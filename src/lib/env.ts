@@ -7,6 +7,7 @@ export const env = createEnv({
     ANILIST_URL: z.string().url(),
     ANIWATCH_URL: z.string().url(),
     JIMAKU_KEY: z.string().min(1),
+    JIMAKU_URL: z.string().url()
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

@@ -1,1 +1,0 @@
-export const animeProivders = ['hianime', 'animepahe'] as const

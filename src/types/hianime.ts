@@ -18,9 +18,9 @@ export const hianimeAnimeEpisodeStreamingLink = t.Object({
   tracks: t.Array(
     t.Object({
       file: t.String(),
-      label: t.String(),
-      kind: t.String(),
-      default: t.Optional(t.String())
+      label: t.Optional(t.String()),
+      kind: t.UnionEnum(['captions', 'thumbnails', 'chapters']),
+      default: t.Optional(t.Boolean())
     })
   ),
   intro: t.Object({
@@ -31,8 +31,12 @@ export const hianimeAnimeEpisodeStreamingLink = t.Object({
     start: t.Number(),
     end: t.Number()
   }),
-  anilistId: t.Number(),
-  malId: t.Number()
+  sources: t.Array(t.Object({
+    url: t.String(),
+    type: t.String()
+  })),
+  anilistId: t.Optional(t.Number()),
+  malId: t.Optional(t.Number())
 })
 
 export const hianimeAnimeData = t.Object({

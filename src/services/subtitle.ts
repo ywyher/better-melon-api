@@ -1,55 +1,43 @@
-import { env } from "../env";
+import { env } from "../lib/env";
 import { ErrorResponse } from "../types";
 import { SubtitleEntry, SubtitleFile } from "../types/subtitle";
-import { isErrorResponse } from "../utils";
+import { assertSuccess, createError, isErrorResponse, makeRequest } from "../lib/utils";
 
 export async function getSubtitleEntries(anilistId: string): Promise<SubtitleEntry[] | ErrorResponse> {
   try {
-    const entries = await fetch(`https://jimaku.cc/api/entries/search?anilist_id=${anilistId}`, {
-      headers: { Authorization: `${env.JIMAKU_KEY}` },
+    const { data: entries } = await makeRequest<SubtitleEntry[]>(
+      `${env.JIMAKU_URL}/api/entries/search?anilist_id=${anilistId}`, {
+      headers: { 
+        Authorization: env.JIMAKU_KEY
+      },
+      benchmark: true,
+      name: 'subitlte-entries',
     });
-    
-    if (!entries.ok) {
-      throw new Error(`Failed to fetch subtitle entries: ${entries.status} ${entries.statusText}`);
-    }
-    
-    return await entries.json() as SubtitleEntry[];
+    assertSuccess(entries)
+
+    return entries;
   } catch (error) {
-    return {
-      success: false,
-      message: `Failed to fetch subtitle entries: ${error instanceof Error ? error.message : 'Unknown error'}`
-    };
+    return createError(` ${error instanceof Error ? error.message : 'Failed to fetch subtitle entries: Unknown error'}`)
   }
 }
 
 export async function getSubtitleFiles(anilistId: string, episodeNumber: string): Promise<SubtitleFile[] | ErrorResponse> {
   try {
     const entries = await getSubtitleEntries(anilistId);
+    assertSuccess(entries)
     
-    if (isErrorResponse(entries)) {
-      return entries;
-    }
-    
-    if (entries.length === 0) {
-      return {
-        success: false,
-        message: `No subtitle entries found for Anilist ID: ${anilistId}`
-      };
-    }
-    
-    const files = await fetch(`https://jimaku.cc/api/entries/${entries[0].id}/files?episode=${episodeNumber}`, {
-      headers: { Authorization: `${process.env.JIMAKU_KEY}` },
+    const { data: files } = await makeRequest<SubtitleFile[]>(
+      `${env.JIMAKU_URL}/api/entries/${entries[0].id}/files?episode=${episodeNumber}`, {
+      headers: { 
+        Authorization: env.JIMAKU_KEY
+      },
+      benchmark: true,
+      name: 'subtitle-files',
     });
-    
-    if (!files.ok) {
-      throw new Error(`Failed to fetch subtitle files: ${files.status} ${files.statusText}`);
-    }
-    
-    return await files.json() as SubtitleFile[];
+    assertSuccess(files)
+
+    return files;
   } catch (error) {
-    return {
-      success: false,
-      message: `Failed to fetch subtitle files: ${error instanceof Error ? error.message : 'Unknown error'}`
-    };
+    return createError(`${error instanceof Error ? error.message : 'Failed to fetch subtitle files: Unknown error'}`)
   }
 }

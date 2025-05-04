@@ -1,6 +1,6 @@
 import { t } from "elysia";
 
-const subtitleEntry = t.Object({
+export const subtitleEntry = t.Object({
   id: t.Number(),
   name: t.String(),
   flags: t.Object({
@@ -16,7 +16,7 @@ const subtitleEntry = t.Object({
   japanese_name: t.String()
 })
 
-const subtitleFile = t.Object({
+export const subtitleFile = t.Object({
   url: t.String(),
   name: t.String(),
   size: t.Number(),

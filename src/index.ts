@@ -1,68 +1,19 @@
-import Elysia, { t } from "elysia";
-import { getSubtitleFiles } from "./services/subtitle";
-import { getHianimeAnime } from "./services/hianime";
-import { isErrorResponse } from "./utils";
-import { animeProivders } from "./constants";
-import { env } from "./env";
+import Elysia from "elysia";
+import { env } from "./lib/env";
+import { api } from "./api";
+import { animeProviders } from "./lib/constants";
 
-
-export const api = new Elysia({ prefix: '/api/v1' })
-  .get(
-    '/:anilistId/:episodeNumber/:provider',
-    async ({ params: { anilistId, episodeNumber, provider } }) => {
-      let anime;
-      
-      switch(provider) {
-        case 'hianime':
-          anime = await getHianimeAnime(anilistId, episodeNumber);
-          break;
-        case 'animepahe':
-          return {
-            success: false,
-            message: "Animepahe provider is not yet implemented"
-          };
-        default:
-          return {
-            success: false,
-            message: `Unsupported provider: ${provider}`
-          };
-      }
-
-      const subtitleFiles = await getSubtitleFiles(anilistId, episodeNumber);
-
-      if (isErrorResponse(anime)) return anime;
-      if (isErrorResponse(subtitleFiles)) return subtitleFiles;
-
-      return {
-        success: true,
-        data: {
-          anime,
-          subtitleFiles,
-        }
-      };
-    }, 
-    {
-      params: t.Object({
-        anilistId: t.String(),
-        episodeNumber: t.String(),
-        provider: t.UnionEnum(animeProivders, {
-          error: {
-            success: false,
-            message: `Invalid provider. Supported providers: ${animeProivders.join(', ')}`
-          }
-        })
-      }),
-      response: t.Object({
-        success: t.Boolean(),
-        data: t.Optional(t.Object({
-          anime: t.Any(),
-          subtitleFiles: t.Any()
-        })),
-        message: t.Optional(t.String())
-      })
+export const server = new Elysia()
+  .use(api)
+  .get('/', () => {
+    return {
+      about: "This API provide the needed data like M3U8 links and japanese subtitle files for better-melon",
+      status: '200',
+      providers: animeProviders[0],
+      routes: [
+        '/api/v1/:anilistId/:episodeNumber/:provider',
+        '/api/v1/health'
+      ]
     }
-  )
-  .get('/health', () => ({ status: 'ok' }))
+  })
   .listen(env.PORT)
-
-console.log(`🦊 Elysia is running at http://localhost:3000`)
