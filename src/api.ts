@@ -7,7 +7,7 @@ import { hianimeAnimeData, hianimeAnimeEpisodeStreamingLink, hianimeAnimeRespons
 import { animeProvider } from "./types";
 import { anilistAnimeData } from "./types/anilist";
 
-export const api = new Elysia({ prefix: '/api/v1' })
+export const api = new Elysia({ prefix: '/api' })
   .get(
   '/:anilistId/:episodeNumber/:provider',
   async ({ params: { anilistId, episodeNumber, provider } }) => {
@@ -17,10 +17,8 @@ export const api = new Elysia({ prefix: '/api/v1' })
 
       try {
         const anime = await getHianimeAnime(anilistId, episodeNumber);
-        assertSuccess(anime)
 
         const subtitleFiles = await getSubtitleFiles(anilistId, episodeNumber);
-        assertSuccess(subtitleFiles)
   
         const fetchEnd = performance.now()
         console.log(`Fetched data in ${(fetchEnd - fetchStart).toFixed(2)}ms`);

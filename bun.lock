@@ -6,6 +6,7 @@
       "dependencies": {
         "@apollo/server": "^4.12.0",
         "@elysiajs/apollo": "^1.2.0",
+        "@elysiajs/cors": "^1.3.0",
         "@elysiajs/graphql-yoga": "^1.2.0",
         "@t3-oss/env-core": "^0.13.4",
         "axios": "^1.9.0",
@@ -63,6 +64,8 @@
     "@ark/util": ["@ark/util@0.46.0", "", {}, "sha512-JPy/NGWn/lvf1WmGCPw2VGpBg5utZraE84I7wli18EDF3p3zc/e9WolT35tINeZO3l7C77SjqRJeAUoT0CvMRg=="],
 
     "@elysiajs/apollo": ["@elysiajs/apollo@1.2.0", "", { "dependencies": { "@apollo/server": "4.10.4", "@apollo/server-plugin-landing-page-graphql-playground": "^4.0.1", "graphql": "^16.6.0", "graphql-tag": "^2.12.6" }, "peerDependencies": { "elysia": ">= 1.2.0" } }, "sha512-ZOzk/bqmPu6kA31K97oZJ7uf7JqYD3qhmWJZfUftsxD0e+yjFIFzD2CdviakkSQv/OYW49z1LIRB9lXbl64r5Q=="],
+
+    "@elysiajs/cors": ["@elysiajs/cors@1.3.0", "", { "peerDependencies": { "elysia": ">= 1.3.0" } }, "sha512-e7M7MbMpBUn+6tZokze4hCK1JIXfVAw5Xd5n4E2jY+cpB7Tie6KEoXKEXisrahYQ2er3h0fB33foIJpIJinEPA=="],
 
     "@elysiajs/graphql-yoga": ["@elysiajs/graphql-yoga@1.2.0", "", { "dependencies": { "graphql": "^16.6.0", "graphql-mobius": "^0.1.11", "graphql-yoga": "^3.9.1" }, "peerDependencies": { "elysia": ">= 1.2.0" } }, "sha512-wWpmjTqvtwbJtIOCmAM/o/6W3joxVH2gd7e0/Fu2Px5pwmbFuNQ4NmhZPTEEd3q9SOJhV9+zT0x81zZA4pcSmw=="],
 
