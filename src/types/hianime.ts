@@ -1,8 +1,24 @@
 import { t } from "elysia";
+import { anilistAnimeData } from "./anilist";
+
 
 export const hianimeAnimeStatus = t.UnionEnum(["finished-airing", "currently-airing", "not-yet-aired"])
 export const hianimeAnimeSeasons = t.UnionEnum(["spring", "fall", "summer", "winter"])
 export const hianimeAnimeType = t.UnionEnum(['movie', 'tv', 'ova', 'ona', 'special', 'music'])
+
+const datePattern = '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; // YYYY-MM-DD
+const commaSeparatedPattern = '^[a-zA-Z0-9]+(,[a-zA-Z0-9]+)*$';
+
+export const anilistToHiAnime = t.Object({
+  q: t.String(),
+  success: t.Boolean(),
+  type: hianimeAnimeType,
+  status: hianimeAnimeStatus,
+  genres: t.String({ pattern: commaSeparatedPattern }), // joined array
+  season: hianimeAnimeSeasons,
+  startDate: t.String({ pattern: datePattern }),
+  endDate: t.String({ pattern: datePattern }),
+})
 
 export const hianimeAnimeEpisode = t.Object({
   number: t.Number(),
@@ -53,7 +69,7 @@ export const hianimeAnimeData = t.Object({
   })
 })
 
-export const hianimeResponse = t.Object({
+export const hianimeSearchResponse = t.Object({
   animes: t.Array(hianimeAnimeData),
   mostPopularAnimes: t.Array(hianimeAnimeData),
   searchFilters: t.Object({
@@ -70,14 +86,28 @@ export const hianimeResponse = t.Object({
   currentPage: t.Number()
 })
 
+export const hianimeEpisodesResponse = t.Object({
+  totalEpisodes: t.Number(),
+  episodes: t.Array(hianimeAnimeEpisode)
+})
+
+export const hianimeAnimeResponse = t.Object({
+  details: anilistAnimeData,
+  streamingLinks: hianimeAnimeEpisodeStreamingLink
+})
+
+export type HianimeAnimeResponse = typeof hianimeAnimeResponse.static
 export type HianimeAnimeEpisodeStreamingLink = typeof hianimeAnimeEpisodeStreamingLink.static
 export type HianimeAnimeData = typeof hianimeAnimeData.static
 export type HianimeAnimeEpisode = typeof hianimeAnimeEpisode.static
-export type HianimeResponse = typeof hianimeResponse.static
+export type HianimeSearchResponse = typeof hianimeSearchResponse.static
 export type HianimeAnimeStatus = typeof hianimeAnimeStatus.static
 export type HianimeAnimeSeason = typeof hianimeAnimeSeasons.static
 export type HianimeAnimeType = typeof hianimeAnimeType.static
-export type HianimeAnimeEpisodesResponse = {
-  totalEpisodes: Number,
-  episodes: HianimeAnimeEpisode[]
-}
+export type HianimeAnimeEpisodesResponse = typeof hianimeEpisodesResponse.static
+export type AnilistToHiAnime = typeof anilistToHiAnime.static
+
+export type HianimeApiResponse<T> = {
+  success: boolean,
+  data: T
+} 

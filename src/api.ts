@@ -3,8 +3,9 @@ import { getSubtitleFiles } from "./services/subtitle";
 import { getHianimeAnime } from "./services/hianime";
 import { assertSuccess, createError, isErrorResponse } from "./lib/utils";
 import { subtitleFile } from "./types/subtitle";
-import { hianimeAnimeData, hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
+import { hianimeAnimeData, hianimeAnimeEpisodeStreamingLink, hianimeAnimeResponse, HianimeAnimeResponse } from "./types/hianime";
 import { animeProvider } from "./types";
+import { anilistAnimeData } from "./types/anilist";
 
 export const api = new Elysia({ prefix: '/api/v1' })
   .get(
@@ -13,31 +14,29 @@ export const api = new Elysia({ prefix: '/api/v1' })
       const fetchStart = performance.now()
 
       console.clear()
-      let anime;
-      
-      switch(provider) {
-        case 'hianime':
-          anime = await getHianimeAnime(anilistId, episodeNumber);
-          break;
-        default:
-          return createError(`Unsupported provider: ${provider}`)
+
+      try {
+        const anime = await getHianimeAnime(anilistId, episodeNumber);
+        assertSuccess(anime)
+
+        const subtitleFiles = await getSubtitleFiles(anilistId, episodeNumber);
+        assertSuccess(subtitleFiles)
+  
+        const fetchEnd = performance.now()
+        console.log(`Fetched data in ${(fetchEnd - fetchStart).toFixed(2)}ms`);
+  
+        return {
+          success: true,
+          data: {
+            provider,
+            details: anime.details,
+            streamingLinks: anime.streamingLinks,
+            subtitles: subtitleFiles,
+          }
+        };
+      } catch (error) {
+        return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
       }
-      assertSuccess(anime)
-
-      const subtitleFiles = await getSubtitleFiles(anilistId, episodeNumber);
-      assertSuccess(subtitleFiles)
-
-      const fetchEnd = performance.now()
-      console.log(`Fetched data in ${(fetchEnd - fetchStart).toFixed(2)}ms`);
-
-      return {
-        success: true,
-        data: {
-          provider,
-          anime,
-          subtitles: subtitleFiles,
-        }
-      };
     }, 
     {
       params: t.Object({
@@ -49,10 +48,8 @@ export const api = new Elysia({ prefix: '/api/v1' })
         success: t.Boolean(),
         data: t.Optional(t.Object({
           provider: animeProvider,
-          anime: t.Object({
-            details: t.Any(hianimeAnimeData),
-            streamingLinks: hianimeAnimeEpisodeStreamingLink
-          }),
+          details: anilistAnimeData,
+          streamingLinks: hianimeAnimeEpisodeStreamingLink,
           subtitles: t.Array(subtitleFile)
         })),
         message: t.Optional(t.String())

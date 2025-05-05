@@ -1,10 +1,10 @@
 import { t } from "elysia";
 
 export const animeProvider = t.UnionEnum(['hianime'],{
-    error: {
-      success: false,
-      message: `Invalid provider. Supported providers: hianime`
-    }
+  error: {
+    success: false,
+    message: `Invalid provider. Supported providers: hianime`
+  }
 })
 
 export type AnimeProvider = typeof animeProvider.static

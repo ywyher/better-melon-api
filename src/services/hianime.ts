@@ -1,23 +1,20 @@
 import { env } from "../lib/env";
-import { ApiResponse, ErrorResponse, SuccessResponse } from "../types";
 import { AnilistAnimeData, AnilistAnimeFormat, AnilistAnimeStatus } from "../types/anilist";
-import { HianimeAnimeData, HianimeAnimeEpisodesResponse, hianimeAnimeEpisodeStreamingLink, HianimeAnimeEpisodeStreamingLink, hianimeAnimeStatus, HianimeAnimeStatus, hianimeAnimeType, HianimeAnimeType, HianimeResponse } from "../types/hianime";
-import { assertSuccess, createError, isErrorResponse, makeRequest } from "../lib/utils";
+import { AnilistToHiAnime, HianimeAnimeData, HianimeAnimeEpisodesResponse, hianimeAnimeEpisodeStreamingLink, HianimeAnimeEpisodeStreamingLink, hianimeAnimeResponse, HianimeAnimeResponse, hianimeAnimeStatus, HianimeAnimeStatus, hianimeAnimeType, HianimeAnimeType, HianimeApiResponse, HianimeSearchResponse } from "../types/hianime";
+import { makeRequest } from "../lib/utils";
 import { getAnilistAnime } from "./anilist";
-import axios, { AxiosResponse } from "axios";
 
-function mapAnilistToHiAnime(anilistData: AnilistAnimeData) {
+function mapAnilistToHiAnime(anilistData: AnilistAnimeData): AnilistToHiAnime {
   const startTime = performance.now();
   
   try {
-    const data = anilistData.Media;
-    const format = data.format;
-    const status = data.status;
-    const season = data.season.toLowerCase();
-    const genres = data.genres.map((g) => g.toLowerCase()).join(',')
-    const startDate = data.startDate;
-    const endDate = data.endDate;
-    const title = data.title.english
+    const format = anilistData.format;
+    const status = anilistData.status;
+    const season = anilistData.season.toLowerCase() as AnilistToHiAnime['season'];
+    const genres = anilistData.genres.map((g) => g.toLowerCase()).join(',')
+    const startDate = anilistData.startDate;
+    const endDate = anilistData.endDate;
+    const title = anilistData.title.english
 
     const formatMapping: Record<AnilistAnimeFormat, HianimeAnimeType | null> = {
       "TV": "tv",
@@ -30,7 +27,7 @@ function mapAnilistToHiAnime(anilistData: AnilistAnimeData) {
     };
     const mappedType = formatMapping[format];
     if (!mappedType) {
-      return createError(`Invalid type: ${format}. Valid HiAnime types are: ${Object.keys(hianimeAnimeType.enum).join(', ')}`)
+      throw new Error(`Invalid type: ${format}. Valid HiAnime types are: ${Object.keys(hianimeAnimeType.enum).join(', ')}`)
     }
 
     const statusMapping: Record<AnilistAnimeStatus, HianimeAnimeStatus | null> = {
@@ -42,7 +39,7 @@ function mapAnilistToHiAnime(anilistData: AnilistAnimeData) {
     }
     const mappedStatus = statusMapping[status];
     if (!mappedStatus) {
-      return createError(`Invalid status: ${status}. Valid HiAnime statuss are: ${Object.keys(hianimeAnimeStatus.enum).join(', ')}`)
+      throw new Error(`Invalid status: ${status}. Valid HiAnime statuss are: ${Object.keys(hianimeAnimeStatus.enum).join(', ')}`)
     }
 
     const result = {
@@ -63,72 +60,61 @@ function mapAnilistToHiAnime(anilistData: AnilistAnimeData) {
   } catch (error) {
     const endTime = performance.now();
     console.log(`mapAnilistToHiAnime failed after ${(endTime - startTime).toFixed(2)}ms`);
-    
-    return createError(`Failed to map Anilist to HiAnime: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(`Failed to map Anilist to HiAnime: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
-async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promise<HianimeAnimeData | ErrorResponse> {
+async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promise<HianimeAnimeData> {
   try {
-    const mapped = mapAnilistToHiAnime(anilistData);
-    assertSuccess(mapped)
-    const { endDate, genres, q, season, startDate, status, type } = mapped;
+    const { endDate, genres, q, season, startDate, status, type } = mapAnilistToHiAnime(anilistData);
     
-    const { data: { data: hianimeData } } = await axios.get<SuccessResponse<HianimeResponse>>(
+    const { data: { data: hianimeData } } = await makeRequest<HianimeApiResponse<HianimeSearchResponse>>(
       `${env.ANIWATCH_URL}/search?q=${q}&genres=${genres}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&season=${season}&sort=score&language=sub&score=good`,
+      { benchmark: true, name: "hianime-search" }
     )
-    assertSuccess(hianimeData)
+
     const anime = hianimeData.animes[0];
 
     return anime;
   } catch (error) {
-    return createError(`${error instanceof Error ? error.message : 'Failed to fetch hianime anime data: Unknown error'}`);
+    throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch hianime anime data: Unknown error'}`);
   }
 }
 
-async function getHianimeAnimeEpisodeStreamingLinks(animeId: HianimeAnimeData['id'], episodeNumber: string): Promise<HianimeAnimeEpisodeStreamingLink[] | ErrorResponse> {
+async function getHianimeAnimeEpisodeStreamingLinks(animeId: HianimeAnimeData['id'], episodeNumber: string): Promise<HianimeAnimeEpisodeStreamingLink> {
   try {
-    const { data: { data: episodes } } = await makeRequest<SuccessResponse<HianimeAnimeEpisodesResponse>>(
+    const { data: { data: episodes } } = await makeRequest<HianimeApiResponse<HianimeAnimeEpisodesResponse>>(
       `${env.ANIWATCH_URL}/anime/${animeId}/episodes`,
       { benchmark: true, name: 'hianime-episodes' }
     );
-
-    assertSuccess(episodes)
     
     const episode = episodes.episodes.find(e => e.number === Number(episodeNumber));
-    if(!episode) throw new Error("Couldn't find hianime anime episode data");
+    if(!episode) throw new Error("Couldn't find hianime anime episode data")
 
-    const { data: { data: links } } = await makeRequest<SuccessResponse<HianimeAnimeEpisodeStreamingLink[]>>(
+    const { data: { data: links } } = await makeRequest<HianimeApiResponse<HianimeAnimeEpisodeStreamingLink>>(
       `${env.ANIWATCH_URL}/episode/sources?animeEpisodeId=${episode.episodeId}&category=sub`,
       { benchmark: true, name: 'hianime-streaming-links' }
     );
-
-    assertSuccess(links)
     
     return links;
   } catch (error) {
-    return createError(`${error instanceof Error ? error.message : 'Failed to fetch hianime anime episode streaming links: Unknown error'}`);
+    throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch hianime anime episode streaming links: Unknown error'}`);
   }
 }
 
-export async function getHianimeAnime(anilistId: string, episodeNumber: string): Promise<any | ErrorResponse> {
+export async function getHianimeAnime(anilistId: string, episodeNumber: string): Promise<HianimeAnimeResponse> {
   try {
-    const anilistData = await getAnilistAnime(anilistId);
-    assertSuccess(anilistData)
+    const anilistAnimeData = await getAnilistAnime(anilistId);
 
-    const animeData = await getHianimeAnimeInfo(anilistData);
-    assertSuccess(animeData)
+    const animeData = await getHianimeAnimeInfo(anilistAnimeData);
 
     const links = await getHianimeAnimeEpisodeStreamingLinks(animeData.id, episodeNumber);
-    assertSuccess(links)
 
-    const result = {
-      details: animeData,
+    return {
+      details: anilistAnimeData,
       streamingLinks: links
-    };
-
-    return result;
+    }
   } catch (error) {
-    return createError(`${error instanceof Error ? error.message : 'Failed to fetch hianime data: Unknown error'}`);
+    throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch hianime data: Unknown error'}`);
   }
 }

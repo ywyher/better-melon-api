@@ -88,29 +88,35 @@ export const anilistAnimeDate = t.Object({
 })
 
 export const anilistAnimeData = t.Object({
-  Media: t.Object({
-    id: t.Union([
-      t.String(),
-      t.Number()
-    ]),
-    idMal: t.Union([
-      t.String(),
-      t.Number()
-    ]),
-    title: anilistAnimeTitle,
-    status: anilistAnimeStatus,
-    startDate: anilistAnimeDate,
-    endDate: anilistAnimeDate,
-    description: t.String(),
-    episodes: t.Number(),
-    season: anilistAnimeSeason,
-    seasonYear: t.Number(),
-    format: anilistAnimeFormat,
-    genres: t.Array(t.String())
+  id: t.Union([
+    t.String(),
+    t.Number()
+  ]),
+  idMal: t.Union([
+    t.String(),
+    t.Number()
+  ]),
+  title: anilistAnimeTitle,
+  status: anilistAnimeStatus,
+  startDate: anilistAnimeDate,
+  endDate: anilistAnimeDate,
+  description: t.String(),
+  episodes: t.Number(),
+  season: anilistAnimeSeason,
+  seasonYear: t.Number(),
+  format: anilistAnimeFormat,
+  genres: t.Array(t.String())
+})
+
+export const anilistAnimeResponse = t.Object({
+  data: t.Object({
+    Media: anilistAnimeData
   })
 })
 
+
 export type AnilistAnimeData = typeof anilistAnimeData.static
+export type AnilistAnimeResponse = typeof anilistAnimeResponse.static
 export type AnilistAnimeStatus = typeof anilistAnimeStatus.static
 export type AnilistAnimeSeason = typeof anilistAnimeSeason.static
 export type AnilistAnimeFormat = typeof anilistAnimeFormat.static

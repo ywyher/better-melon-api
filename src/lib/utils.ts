@@ -1,5 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
-import { AnimeProvider, ApiResponse, ErrorResponse, SuccessResponse } from "../types";
+import { AnimeProvider, ErrorResponse } from "../types";
 import client from "./client";
 import { animeProviders } from "./constants";
 

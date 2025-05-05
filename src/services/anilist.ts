@@ -1,11 +1,10 @@
+import { AnilistAnimeData, AnilistAnimeResponse } from "../types/anilist"
+import { makeRequest } from "../lib/utils";
 import { env } from "../lib/env";
-import { ErrorResponse, SuccessResponse } from "../types";
-import { AnilistAnimeData } from "../types/anilist"
-import { assertSuccess, createError, makeRequest } from "../lib/utils";
 
-export async function getAnilistAnime(anilistId: AnilistAnimeData['Media']['id']): Promise<AnilistAnimeData | ErrorResponse> {
+export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promise<AnilistAnimeData> {
   try {
-    const { data: { data: anilistData } } = await makeRequest<SuccessResponse<AnilistAnimeData>>(
+    const { data: { data: anilistAnimeData } } = await makeRequest<AnilistAnimeResponse>(
       env.ANILIST_URL,
       {
         benchmark: true,
@@ -20,12 +19,18 @@ export async function getAnilistAnime(anilistId: AnilistAnimeData['Media']['id']
               Media(id: ${anilistId}) {
                 id
                 idMal
-                format
+                bannerImage
+                coverImage {
+                  large
+                  medium
+                }
                 title {
                   english
                 }
+                format
                 episodes
                 description
+                genres
                 status
                 season
                 seasonYear
@@ -39,17 +44,15 @@ export async function getAnilistAnime(anilistId: AnilistAnimeData['Media']['id']
                   month
                   day
                 }
-                genres
               } 
             }
           `,
         }
       }, 
     );
-    assertSuccess(anilistData)
     
-    return anilistData;
+    return anilistAnimeData.Media;
   } catch (error) {
-    return createError(`${error instanceof Error ? error.message : 'Failed to fetch anilist data: Unknown error'}`)
+    throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch anilist data: Unknown error'}`)
   }
 }
