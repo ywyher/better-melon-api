@@ -105,7 +105,9 @@ export const anilistAnimeData = t.Object({
   season: anilistAnimeSeason,
   seasonYear: t.Number(),
   format: anilistAnimeFormat,
-  genres: t.Array(t.String())
+  genres: t.Array(t.String()),
+  averageScore: t.Number(),
+  isAdult: t.Boolean()
 })
 
 export const anilistAnimeResponse = t.Object({

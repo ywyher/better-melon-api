@@ -44,6 +44,8 @@ export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promis
                   month
                   day
                 }
+                averageScore
+                isAdult
               } 
             }
           `,
