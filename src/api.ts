@@ -45,7 +45,7 @@ export const api = new Elysia({ prefix: '/api' })
       response: t.Object({
         success: t.Boolean(),
         data: t.Optional(t.Object({
-          provider: animeProvider,
+          provider: t.Number(),
           details: anilistAnimeData,
           streamingLinks: hianimeAnimeEpisodeStreamingLink,
           subtitles: t.Array(subtitleFile)
