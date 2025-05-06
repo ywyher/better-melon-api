@@ -14,7 +14,6 @@ export const anilistToHiAnime = t.Object({
   success: t.Boolean(),
   type: hianimeAnimeType,
   status: hianimeAnimeStatus,
-  genres: t.String({ pattern: commaSeparatedPattern }), // joined array
   season: hianimeAnimeSeasons,
   startDate: t.String({ pattern: datePattern }),
   endDate: t.String({ pattern: datePattern }),

@@ -11,7 +11,6 @@ async function mapAnilistToHiAnime(anilistData: AnilistAnimeData): Promise<Anili
     const format = anilistData.format;
     const status = anilistData.status;
     const season = anilistData.season.toLowerCase() as AnilistToHiAnime['season'];
-    const genres = anilistData.genres.map((g) => g.toLowerCase()).join(',')
     const startDate = anilistData.startDate;
     const endDate = anilistData.endDate;
     const title = anilistData.title.english
@@ -47,7 +46,6 @@ async function mapAnilistToHiAnime(anilistData: AnilistAnimeData): Promise<Anili
       success: true,
       type: mappedType,
       status: mappedStatus,
-      genres,
       season,
       startDate: `${startDate.year}-${startDate.month}-${startDate.day}`,
       endDate: `${endDate.year}-${endDate.month}-${endDate.day}`
@@ -67,15 +65,15 @@ async function mapAnilistToHiAnime(anilistData: AnilistAnimeData): Promise<Anili
 async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promise<HianimeAnimeData> {
   try {
     const mapped = await mapAnilistToHiAnime(anilistData);
-    const { endDate, genres, q, season, startDate, status, type } = mapped
+    const { endDate, q, season, startDate, status, type } = mapped
     
     const { data: { data: hianimeData } } = await makeRequest<HianimeApiResponse<HianimeSearchResponse>>(
-      `${env.ANIWATCH_URL}/search?q=${q}&genres=${genres}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&season=${season}&sort=score&language=sub&score=good`,
+      `${env.ANIWATCH_URL}/search?q=${q}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&season=${season}&sort=score&language=sub&score=good`,
       { benchmark: true, name: "hianime-search" }
     )
 
     const anime = hianimeData.animes[0];
-    console.log(anime)
+    console.log(hianimeData.animes)
 
     return anime;
   } catch (error) {

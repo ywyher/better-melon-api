@@ -1,4 +1,4 @@
-import Elysia, { error } from "elysia";
+import Elysia from "elysia";
 import { env } from "./lib/env";
 import { api } from "./api";
 import { animeProviders } from "./lib/constants";
