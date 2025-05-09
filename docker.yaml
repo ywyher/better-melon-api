@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  aniwatch-api:
+    image: ghcr.io/ghoshritesh12/aniwatch
+    container_name: aniwatch-api
+    ports:
+      - "4000:4000"
+    restart: unless-stopped

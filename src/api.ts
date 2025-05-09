@@ -13,7 +13,7 @@ export const api = new Elysia({ prefix: '/api' })
   async ({ params: { anilistId, episodeNumber, provider } }) => {
       const fetchStart = performance.now()
 
-      console.clear()
+      console.log('*-----------------------------------------------------------------------------------*')
 
       try {
         const anime = await getHianimeAnime(anilistId, episodeNumber);
