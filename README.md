@@ -26,7 +26,16 @@ cd ./better-melon-mapper
 - Set up AniList API credentials at [anilist.co/settings/developer](https://anilist.co/settings/developer)
 - Set up Aniwatch API by following [this repo's](https://github.com/ghoshRitesh12/aniwatch-api) readme
 
-### 3. Install dependencies and start the API
+### 3. Setup enviroment variables
+```.env
+PORT=6969
+ANILIST_URL=https://graphql.anilist.co/
+ANIWATCH_URL=http://localhost:4000/api/v2/hianime
+JIMAKU_KEY=
+JIMAKU_URL=https://jimaku.cc
+```
+
+### 4. Install dependencies and start the API
 ```sh
 bun i && bun dev
 ```
