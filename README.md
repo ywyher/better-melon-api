@@ -11,7 +11,8 @@ An API made to fetch required data to run [Better Melon](https://github.com/ywyh
   - English subtitle files
 
 # Better Melon Mapper Self-Hosting Guide
-> [!note] this API utilizes [bun](https://bun.sh) make sure you have that installed
+> [!note]
+> this API utilizes [bun](https://bun.sh) make sure you have that installed
 
 ## Quick Start
 
