@@ -96,6 +96,11 @@ export const anilistAnimeData = t.Object({
     t.String(),
     t.Number()
   ]),
+  bannerImage: t.String(),
+  coverImage: t.Object({
+    large: t.String(),
+    medium: t.String(),
+  }),
   title: anilistAnimeTitle,
   status: anilistAnimeStatus,
   startDate: anilistAnimeDate,

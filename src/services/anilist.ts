@@ -52,7 +52,7 @@ export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promis
         }
       }, 
     );
-    
+
     return anilistAnimeData.Media;
   } catch (error) {
     throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch anilist data: Unknown error'}`)
