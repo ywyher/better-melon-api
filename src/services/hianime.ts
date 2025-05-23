@@ -13,8 +13,8 @@ async function mapAnilistToHiAnime(anilistData: AnilistAnimeData): Promise<Anili
     const season = anilistData.season.toLowerCase() as AnilistToHiAnime['season'];
     const startDate = anilistData.startDate;
     const endDate = anilistData.endDate;
-    const title = anilistData.title.english
-
+    const title = anilistData.title.english.toLowerCase().replace(/\s+/g, '+');
+    
     const formatMapping: Record<AnilistAnimeFormat, HianimeAnimeType | null> = {
       "TV": "tv",
       "TV_SHORT": "tv",
@@ -68,13 +68,11 @@ async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promise<Hiani
     const { endDate, q, season, startDate, status, type } = mapped
     
     const { data: { data: hianimeData } } = await makeRequest<HianimeApiResponse<HianimeSearchResponse>>(
-      `${env.ANIWATCH_URL}/search?q=${q}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&season=${season}&sort=score&language=sub&score=good`,
+      `${env.ANIWATCH_URL}/search?q=${q}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&sort=score&language=sub&score=good`,
       { benchmark: true, name: "hianime-search" }
     )
 
     const anime = hianimeData.animes[0];
-    console.log(hianimeData.animes)
-
     return anime;
   } catch (error) {
     throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch hianime anime data: Unknown error'}`);

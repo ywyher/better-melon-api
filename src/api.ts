@@ -21,7 +21,7 @@ export const api = new Elysia({ prefix: '/api' })
         const subtitleFiles = await getSubtitleFiles(anilistId, episodeNumber);
   
         const fetchEnd = performance.now()
-        console.log(`Fetched data in ${(fetchEnd - fetchStart).toFixed(2)}ms`);
+        // console.log(`Fetched data in ${(fetchEnd - fetchStart).toFixed(2)}ms`);
   
         return {
           success: true,
