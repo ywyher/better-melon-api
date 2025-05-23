@@ -68,11 +68,12 @@ async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promise<Hiani
     const { endDate, q, season, startDate, status, type } = mapped
     
     const { data: { data: hianimeData } } = await makeRequest<HianimeApiResponse<HianimeSearchResponse>>(
-      `${env.ANIWATCH_URL}/search?q=${q}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&sort=score&language=sub&score=good`,
+      `${env.ANIWATCH_URL}/search?q=${q}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&language=sub&score=good`,
       { benchmark: true, name: "hianime-search" }
     )
 
     const anime = hianimeData.animes[0];
+    
     return anime;
   } catch (error) {
     throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch hianime anime data: Unknown error'}`);
