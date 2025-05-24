@@ -21,8 +21,8 @@ export const server = new Elysia()
       status: '200',
       providers: animeProviders[0],
       routes: [
-        '/api/v1/:anilistId/:episodeNumber/:provider',
-        '/api/v1/health'
+        '/api/:anilistId/:episodeNumber/:provider',
+        '/api/health'
       ]
     }
   })
