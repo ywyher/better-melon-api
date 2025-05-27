@@ -29,6 +29,10 @@ export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promis
                 }
                 format
                 episodes
+                nextAiringEpisode {
+                  episode
+                  timeUntilAiring
+                }
                 description
                 genres
                 status

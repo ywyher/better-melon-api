@@ -96,7 +96,7 @@ export const anilistAnimeData = t.Object({
     t.String(),
     t.Number()
   ]),
-  bannerImage: t.String(),
+  bannerImage: t.Nullable(t.String()),
   coverImage: t.Object({
     large: t.String(),
     medium: t.String(),
@@ -107,6 +107,10 @@ export const anilistAnimeData = t.Object({
   endDate: anilistAnimeDate,
   description: t.String(),
   episodes: t.Number(),
+  nextAiringEpisode: t.Nullable(t.Object({
+    episode: t.Number(),
+    timeUntilAiring: t.Number()
+  })),
   season: anilistAnimeSeason,
   seasonYear: t.Number(),
   format: anilistAnimeFormat,
