@@ -1,13 +1,38 @@
 import Elysia, { t } from "elysia";
 import { getSubtitleFiles } from "./services/subtitle";
 import { getHianimeAnime } from "./services/hianime";
-import { assertSuccess, createError, isErrorResponse } from "./lib/utils";
+import { createError } from "./lib/utils";
 import { subtitleFile } from "./types/subtitle";
-import { hianimeAnimeData, hianimeAnimeEpisodeStreamingLink, hianimeAnimeResponse, HianimeAnimeResponse } from "./types/hianime";
+import { hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
 import { animeProvider } from "./types";
 import { anilistAnimeData } from "./types/anilist";
+import { index, meiliSearchResponse } from "./types/meilisearch";
+import getJmdictInfo from "./services/jmdict";
 
 export const api = new Elysia({ prefix: '/api' })
+  .get('/indexes/:index/search/:query', 
+    async ({ params: { query } }) => {
+      try {
+        const decodedQuery = decodeURIComponent(query)
+        const data = await getJmdictInfo(decodedQuery)
+        return {
+          success: true,
+          data
+        }
+      } catch (error) {
+        return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
+      }
+  }, {
+    params: t.Object({
+      index: index,
+      query: t.String()
+    }),
+    response: t.Object({
+      success: t.Boolean(),
+      data: t.Optional(meiliSearchResponse),
+      message: t.Optional(t.String())
+    })
+  })
   .get(
   '/:anilistId/:episodeNumber/:provider',
   async ({ params: { anilistId, episodeNumber, provider } }) => {
@@ -35,7 +60,7 @@ export const api = new Elysia({ prefix: '/api' })
       } catch (error) {
         return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
       }
-    }, 
+    },
     {
       params: t.Object({
         anilistId: t.String(),
@@ -52,6 +77,5 @@ export const api = new Elysia({ prefix: '/api' })
         })),
         message: t.Optional(t.String())
       })
-    }
-  )
+  })
   .get('/health', () => ({ status: 'ok' }))
