@@ -7,14 +7,14 @@ import { hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
 import { animeProvider } from "./types";
 import { anilistAnimeData } from "./types/anilist";
 import { index, meiliSearchResponse } from "./types/meilisearch";
-import getJmdictInfo from "./services/jmdict";
+import searchJMdict from "./services/jmdict";
 
 export const api = new Elysia({ prefix: '/api' })
   .get('/indexes/:index/search/:query', 
     async ({ params: { query } }) => {
       try {
         const decodedQuery = decodeURIComponent(query)
-        const entries = await getJmdictInfo(decodedQuery)
+        const entries = await searchJMdict(decodedQuery)
         return {
           success: true,
           entries
