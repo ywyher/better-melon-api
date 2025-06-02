@@ -14,10 +14,10 @@ export const api = new Elysia({ prefix: '/api' })
     async ({ params: { query } }) => {
       try {
         const decodedQuery = decodeURIComponent(query)
-        const data = await getJmdictInfo(decodedQuery)
+        const entries = await getJmdictInfo(decodedQuery)
         return {
           success: true,
-          data
+          entries
         }
       } catch (error) {
         return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
@@ -29,7 +29,7 @@ export const api = new Elysia({ prefix: '/api' })
     }),
     response: t.Object({
       success: t.Boolean(),
-      data: t.Optional(meiliSearchResponse),
+      entries: t.Optional(meiliSearchResponse),
       message: t.Optional(t.String())
     })
   })

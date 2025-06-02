@@ -10,14 +10,6 @@ export const index = t.UnionEnum([
   }
 })
 
-export const meiliSearchResponse = t.Object({
-  hits: t.Array(jmdictWord),
-  query: t.String(),
-  processingTimeMs: t.Number(),
-  limit: t.Number(),
-  offset: t.Number(),
-  estimatedTotalHits: t.Number(),
-})
-
+export const meiliSearchResponse = t.Array(jmdictWord)
 export type Index = typeof index.static
 export type MeiliSearchResponse = typeof meiliSearchResponse.static
