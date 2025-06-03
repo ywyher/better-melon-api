@@ -15,23 +15,26 @@ export default async function searchJMdict(query: string): Promise<MeiliSearchRe
           kanaOnly ? `kana.text = ${query}` : ''
         ]
       });
-      
-      if(!result.hits.length) {
-        result = await index.search(`"${query}"`);
-      }
+
     }else {
       result = await index.search(`"${query}"`, {
         filter: [
           `kanji.text = ${query}`
         ],
       });
-      
-      if(!result.hits.length) {
-        result = await index.search(`"${query}"`);
-      }
     }
 
-    if(!result) throw new Error('result not found')
+    // Fallback 1: exact match without filters
+    if(!result.hits.length) {
+      result = await index.search(`"${query}"`);
+    }
+
+    // Fallback 2: fuzzy search (this will catch 異なり -> 異なる)
+    if(!result.hits.length) {
+      result = await index.search(query); // No quotes = fuzzy matching
+    }
+
+    if(!result.hits.length) throw new Error('result not found')
 
     return result.hits as MeiliSearchResponse;
   } catch (error) {
