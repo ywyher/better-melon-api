@@ -1,15 +1,13 @@
 import { t } from "elysia";
-import { jmdictWord } from "./jmdict";
 
 export const index = t.UnionEnum([
   "jmdict",
+  "jmnedict",
+  "kanjidic2"
 ],{
   error: {
     success: false,
-    message: `Invalid provider. Supported providers: hianime`
+    message: `Invalid provider. Supported providers: jmdict, jmnedict, kanjidic2`
   }
 })
-
-export const meiliSearchResponse = t.Array(jmdictWord)
 export type Index = typeof index.static
-export type MeiliSearchResponse = typeof meiliSearchResponse.static

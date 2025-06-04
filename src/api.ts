@@ -6,30 +6,57 @@ import { subtitleFile } from "./types/subtitle";
 import { hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
 import { animeProvider } from "./types";
 import { anilistAnimeData } from "./types/anilist";
-import { index, meiliSearchResponse } from "./types/meilisearch";
-import searchJMdict from "./services/jmdict";
+import { searchJMdict } from "./services/jmdict";
+import { jmdictSearchResponse } from "./types/jmdict";
+import { searchDictionary } from "./services/dictionary";
+import { dictionarySearchResponse } from "./types/dictionary";
 
 export const api = new Elysia({ prefix: '/api' })
-  .get('/indexes/:index/search/:query', 
+  .get('/dictionary/search/:query', 
     async ({ params: { query } }) => {
       try {
         const decodedQuery = decodeURIComponent(query)
-        const entries = await searchJMdict(decodedQuery)
+        const  result = await searchDictionary(decodedQuery)
         return {
           success: true,
-          entries
+          data: result
         }
       } catch (error) {
         return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
       }
   }, {
     params: t.Object({
-      index: index,
       query: t.String()
     }),
     response: t.Object({
       success: t.Boolean(),
-      entries: t.Optional(meiliSearchResponse),
+      data: t.Optional(dictionarySearchResponse),
+      message: t.Optional(t.String())
+    })
+  })
+  .get('/indexes/:index/search/:query', 
+    async ({ params: { query } }) => {
+      try {
+        const decodedQuery = decodeURIComponent(query)
+        const { entries, isFuzzy } = await searchJMdict(decodedQuery)
+        return {
+          success: true,
+          data: {
+            entries,
+            isFuzzy
+          },
+        }
+      } catch (error) {
+        return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
+      }
+  }, {
+    params: t.Object({
+      index: t.Literal("jmdict"),
+      query: t.String()
+    }),
+    response: t.Object({
+      success: t.Boolean(),
+      data: t.Optional(jmdictSearchResponse),
       message: t.Optional(t.String())
     })
   })
