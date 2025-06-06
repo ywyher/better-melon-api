@@ -28,6 +28,20 @@ export const jmdictGloss = t.Object({
   text: t.String()
 });
 
+export const jmdictSentence = t.Object({
+  land: t.String(),
+  text: t.String()
+})
+
+export const jmdictExample = t.Object({
+  source: t.Object({
+    type: t.String(),
+    value: t.String()
+  }),
+  text: t.String(),
+  sentences: t.Array(jmdictSentence)
+})
+
 export const jmdictKanji = t.Object({
   common: t.Boolean(),
   text: t.String(),
@@ -52,7 +66,8 @@ export const jmdictSense = t.Object({
   misc: t.Array(t.String()),
   info: t.Array(t.String()),
   languageSource: t.Array(jmdictLanguageSoruce),
-  gloss: t.Array(jmdictGloss)
+  gloss: t.Array(jmdictGloss),
+  examples: t.Array(jmdictExample)
 })
 
 export const jmdictWord = t.Object({
