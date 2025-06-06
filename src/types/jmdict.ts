@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { xref } from "./shared";
+import { index } from "./meilisearch";
 
 export const jmdictLanguageSoruce = t.Object({
   lang: t.String(),
@@ -80,7 +81,6 @@ export const jmdictWord = t.Object({
 
 export const jmdictSearchResponse = t.Object({
   entries: t.Array(jmdictWord),
-  isFuzzy: t.Boolean()
 })
 
 export type JMdictSearchResponse = typeof jmdictSearchResponse.static

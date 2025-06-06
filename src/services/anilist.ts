@@ -1,5 +1,5 @@
 import { AnilistAnimeData, AnilistAnimeResponse } from "../types/anilist"
-import { makeRequest } from "../lib/utils";
+import { makeRequest } from "../utils/utils";
 import { env } from "../lib/env";
 
 export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promise<AnilistAnimeData> {

@@ -1,6 +1,6 @@
 import { env } from "../lib/env";
 import { SubtitleEntry, SubtitleFile } from "../types/subtitle";
-import { makeRequest } from "../lib/utils";
+import { makeRequest } from "../utils/utils";
 
 export async function getSubtitleEntries(anilistId: string): Promise<SubtitleEntry[]> {
   try {

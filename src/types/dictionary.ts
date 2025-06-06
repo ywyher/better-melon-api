@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { index } from "./meilisearch";
+import { Index, index } from "./meilisearch";
 import { jmdictWord } from "./jmdict";
 import { kanjidic2Character } from "./kanjidic2";
 import { JMnedictWord } from "./jmnedict";
@@ -12,3 +12,11 @@ export const dictionarySearchResponse = t.Array(
 );
 
 export type DictionarySearchResponse = typeof dictionarySearchResponse.static
+
+export type Query = {
+  indexUid: Index;
+  q: string;
+  limit: number;
+  filter?: string[]
+  sort?: string[]
+}

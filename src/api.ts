@@ -1,7 +1,7 @@
 import Elysia, { t } from "elysia";
 import { getSubtitleFiles } from "./services/subtitle";
 import { getHianimeAnime } from "./services/hianime";
-import { createError } from "./lib/utils";
+import { createError } from "./utils/utils";
 import { subtitleFile } from "./types/subtitle";
 import { hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
 import { animeProvider } from "./types";
@@ -38,12 +38,11 @@ export const api = new Elysia({ prefix: '/api' })
     async ({ params: { query } }) => {
       try {
         const decodedQuery = decodeURIComponent(query)
-        const { entries, isFuzzy } = await searchJMdict(decodedQuery)
+        const { entries } = await searchJMdict(decodedQuery)
         return {
           success: true,
           data: {
-            entries,
-            isFuzzy
+            entries
           },
         }
       } catch (error) {

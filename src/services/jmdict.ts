@@ -1,58 +1,22 @@
 import { meili } from "../lib/meilisearch";
-import { isKana } from 'wanakana';
 import { JMdictSearchResponse } from "../types/jmdict";
+import { getJMdictSearchQueries } from "../utils/jmdict";
+import { mergeResultsByIndex } from "../utils/dictionary";
+import { Index } from "../types/meilisearch";
 
 export async function searchJMdict(query: string): Promise<JMdictSearchResponse> {
+  const jmdictQueries = getJMdictSearchQueries(query)
   try {
-    const kanaOnly = isKana(query)
-    const index = await meili.getIndex('jmdict');
-    let result;
-    let isFuzzy = false;
+    const { results } = await meili.multiSearch({ 
+      queries: [
+        ...jmdictQueries,
+      ]
+    });
 
-    if(kanaOnly) {
-      result = await index.search(`"${query}"`, {
-        filter: [
-          kanaOnly ? `kanji IS EMPTY` : '',
-          kanaOnly ? `kana.text = ${query}` : ''
-        ],
-        sort: [
-          kanaOnly ? 'kana.text:asc' : 'kanji.text:asc'
-        ]
-      });
-    }else {
-      result = await index.search(`"${query}"`, {
-        filter: [
-          `kanji.text = ${query}`
-        ],
-      });
-    }
-
-    // Fallback 1: exact match without filters
-    if(!result.hits.length) {
-      console.log(`Fallback: Exact match`)
-      result = await index.search(`"${query}"`, {
-        sort: [
-          kanaOnly ? 'kana.text:asc' : 'kanji.text:asc'
-        ]
-      });
-    }
-
-    // Fallback 2: fuzzy search (this will catch 異なり -> 異なる)
-    if(!result.hits.length) {
-      console.log(`Fallback: Fuzzy match`)
-      result = await index.search(query, {
-        sort: [
-          kanaOnly ? 'kana.text:asc' : 'kanji.text:asc'
-        ]
-      }); // No quotes = fuzzy matching
-      isFuzzy = true
-    }
-
-    if(!result.hits.length) throw new Error('result not found')
+    const mergedResults = mergeResultsByIndex(results);
 
     return {
-      entries: result.hits,
-      isFuzzy
+      entries: mergedResults[0].hits as any
     } as JMdictSearchResponse;
   } catch (error) {
     console.error('Error in searchJMdict:', error);

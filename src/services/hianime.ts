@@ -1,7 +1,7 @@
 import { env } from "../lib/env";
 import { AnilistAnimeData, AnilistAnimeFormat, AnilistAnimeStatus } from "../types/anilist";
 import { AnilistToHiAnime, HianimeAnimeData, HianimeAnimeEpisodesResponse, hianimeAnimeEpisodeStreamingLink, HianimeAnimeEpisodeStreamingLink, hianimeAnimeResponse, HianimeAnimeResponse, hianimeAnimeStatus, HianimeAnimeStatus, hianimeAnimeType, HianimeAnimeType, HianimeApiResponse, HianimeSearchResponse } from "../types/hianime";
-import { makeRequest } from "../lib/utils";
+import { makeRequest } from "../utils/utils";
 import { getAnilistAnime } from "./anilist";
 
 async function mapAnilistToHiAnime(anilistData: AnilistAnimeData): Promise<AnilistToHiAnime> {
