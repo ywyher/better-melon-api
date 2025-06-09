@@ -2,13 +2,17 @@
 An API made to fetch required data to run [Better Melon](https://github.com/ywyher/better-melon)
 
 # Supported features
-- Support providers
+- Support anime providers
   - hianime
 - Anime general data
 - Japanese subtitle files
 - Anime streaming data
   - Streaming links
   - English subtitle files
+- Japanese dictionary
+  - jmdict
+  - kanjidic2
+  - jmnedict
 
 # Better Melon Mapper Self-Hosting Guide
 > [!note]
@@ -24,7 +28,11 @@ cd ./better-melon-mapper
 ### 2. Run required services
 - Create an account on [Jimaku.cc](https://jimaku.cc) and generate an API token
 - Set up AniList API credentials at [anilist.co/settings/developer](https://anilist.co/settings/developer)
-- Set up Aniwatch API by following [this repo's](https://github.com/ghoshRitesh12/aniwatch-api) readme
+- Set up Aniwatch API and Redis by running:
+  ```sh
+  docker compose -f docker.yaml up -d
+  ```
+  This will start both the Aniwatch API and Redis cache services automatically.
 
 ### 3. Setup enviroment variables
 ```.env
@@ -33,6 +41,7 @@ ANILIST_URL=https://graphql.anilist.co/
 ANIWATCH_URL=http://localhost:4000/api/v2/hianime
 JIMAKU_KEY=
 JIMAKU_URL=https://jimaku.cc
+REDIS_URL=redis://localhost:6379
 ```
 
 ### 4. Install dependencies and start the API

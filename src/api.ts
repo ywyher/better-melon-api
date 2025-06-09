@@ -1,15 +1,16 @@
 import Elysia, { t } from "elysia";
 import { getSubtitleFiles } from "./services/subtitle";
-import { getHianimeAnime } from "./services/hianime";
+import { getHianimeAnime, getHianimeAnimeEpisodes, getHianimeAnimeEpisodeStreamingLinks, getHianimeAnimeInfo } from "./services/hianime";
 import { createError } from "./utils/utils";
 import { subtitleFile } from "./types/subtitle";
-import { hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
+import { hianimeAnimeEpisode, hianimeAnimeEpisodeStreamingLink, hianimeEpisodesResponse } from "./types/hianime";
 import { animeProvider } from "./types";
 import { anilistAnimeData } from "./types/anilist";
 import { searchJMdict } from "./services/jmdict";
 import { jmdictSearchResponse } from "./types/jmdict";
 import { searchDictionary } from "./services/dictionary";
 import { dictionarySearchResponse } from "./types/dictionary";
+import { getAnilistAnime } from "./services/anilist";
 
 export const api = new Elysia({ prefix: '/api' })
   .get('/dictionary/search/:query', 
@@ -63,13 +64,11 @@ export const api = new Elysia({ prefix: '/api' })
   '/:anilistId/:episodeNumber/:provider',
   async ({ params: { anilistId, episodeNumber, provider } }) => {
       const fetchStart = performance.now()
-
+      console.clear()
       console.log('*-----------------------------------------------------------------------------------*')
-
       try {
         const anime = await getHianimeAnime(anilistId, episodeNumber);
-
-        const subtitleFiles = await getSubtitleFiles(anilistId, episodeNumber);
+        const subtitleFiles = await getSubtitleFiles(anime.details, episodeNumber);
 
         const fetchEnd = performance.now()
         console.log(`Fetched data in ${(fetchEnd - fetchStart).toFixed(2)}ms`);

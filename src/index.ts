@@ -21,8 +21,9 @@ export const server = new Elysia()
       providers: animeProviders[0],
       indexes: indexes[0],
       routes: [
-        '/api/indexes/:index/search/:query',
         '/api/:anilistId/:episodeNumber/:provider',
+        '/api/indexes/:index/search/:query',
+        '/api/dictionary/search/:query',
         '/api/health'
       ]
     }
