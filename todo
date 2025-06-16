@@ -1,1 +1,3 @@
+no need for aniwatch-api you could just use aniwatch package without the need to host an additional api
+
 migrate to ky from axios

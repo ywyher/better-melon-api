@@ -9,7 +9,7 @@ services:
     depends_on:
       - redis
     environment:
-      - ANIWATCH_API_REDIS_CONN_URL=redis://redis:6379
+      - ANIWATCH_API_REDIS_CONN_URL=redis://localhost:6379
 
   redis:
     image: redis:latest

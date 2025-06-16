@@ -1,16 +1,16 @@
 import Elysia, { t } from "elysia";
 import { getSubtitleFiles } from "./services/subtitle";
-import { getHianimeAnime, getHianimeAnimeEpisodes, getHianimeAnimeEpisodeStreamingLinks, getHianimeAnimeInfo } from "./services/hianime";
+import { getHianimeAnime } from "./services/hianime";
 import { createError } from "./utils/utils";
 import { subtitleFile } from "./types/subtitle";
-import { hianimeAnimeEpisode, hianimeAnimeEpisodeStreamingLink, hianimeEpisodesResponse } from "./types/hianime";
+import { hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
 import { animeProvider } from "./types";
 import { anilistAnimeData } from "./types/anilist";
 import { searchJMdict } from "./services/jmdict";
 import { jmdictSearchResponse } from "./types/jmdict";
 import { searchDictionary } from "./services/dictionary";
 import { dictionarySearchResponse } from "./types/dictionary";
-import { getAnilistAnime } from "./services/anilist";
+import { searchNHK } from "./services/nhk";
 
 export const api = new Elysia({ prefix: '/api' })
   .get('/dictionary/search/:query', 
@@ -60,9 +60,8 @@ export const api = new Elysia({ prefix: '/api' })
       message: t.Optional(t.String())
     })
   })
-  .get(
-  '/:anilistId/:episodeNumber/:provider',
-  async ({ params: { anilistId, episodeNumber, provider } }) => {
+  .get('/:anilistId/:episodeNumber/:provider',
+    async ({ params: { anilistId, episodeNumber, provider } }) => {
       const fetchStart = performance.now()
       console.clear()
       console.log('*-----------------------------------------------------------------------------------*')
@@ -103,4 +102,30 @@ export const api = new Elysia({ prefix: '/api' })
         message: t.Optional(t.String())
       })
   })
+  .get('/pitch/search/:query',
+    async ({ params: { query } }) => {
+      try {
+        const decodedQuery = decodeURIComponent(query)
+        const { entries } = await searchNHK(decodedQuery)
+
+        return {
+          success: true,
+          data: {
+            entries
+          },
+        }
+      } catch (error) {
+        return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
+      }
+    }, {
+      params: t.Object({
+        query: t.String()
+      }),
+      response: t.Object({
+        success: t.Boolean(),
+        data: t.Optional(t.Any()),
+        message: t.Optional(t.String())
+      })
+    }
+  )
   .get('/health', () => ({ status: 'ok' }))
