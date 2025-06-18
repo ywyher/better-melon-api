@@ -77,7 +77,7 @@ export async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promis
     const { endDate, q, startDate, status, type } = mapped;
 
     const { data: { data: hianimeData } } = await makeRequest<HianimeApiResponse<HianimeSearchResponse>>(
-      `${env.ANIWATCH_URL}/search?q=${q}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&language=sub`,
+      `${env.HIANIME_URL}/search?q=${q}&type=${type}&status=${status}&startDate=${startDate}&endDate=${endDate}&language=sub`,
       { benchmark: true, name: "hianime-search" }
     );
 
@@ -105,7 +105,7 @@ export async function getHianimeAnimeEpisodes(animeId: HianimeAnimeData['id']): 
     }
     
     const { data: { data: episodes } } = await makeRequest<HianimeApiResponse<HianimeAnimeEpisodesResponse>>(
-      `${env.ANIWATCH_URL}/anime/${animeId}/episodes`,
+      `${env.HIANIME_URL}/anime/${animeId}/episodes`,
       { benchmark: true, name: 'hianime-episodes' }
     );
 
@@ -132,10 +132,10 @@ export async function getHianimeAnimeEpisodeStreamingLinks(episodes: HianimeAnim
       return JSON.parse(cachedData as string) as HianimeAnimeEpisodeStreamingLink;
     }
     
-    console.log(`${env.ANIWATCH_URL}/episode/sources?animeEpisodeId=${episode.episodeId}&category=sub`)
+    console.log(`${env.HIANIME_URL}/episode/sources?animeEpisodeId=${episode.episodeId}&category=sub`)
 
     const { data: { data: links } } = await makeRequest<HianimeApiResponse<HianimeAnimeEpisodeStreamingLink>>(
-      `${env.ANIWATCH_URL}/episode/sources?animeEpisodeId=${episode.episodeId}&category=sub`,
+      `${env.HIANIME_URL}/episode/sources?animeEpisodeId=${episode.episodeId}&category=sub`,
       { benchmark: true, name: 'hianime-streaming-links' }
     );
     

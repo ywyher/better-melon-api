@@ -9,7 +9,7 @@ export async function searchNHK(query: string): Promise<any> {
         q: `"${q}"`,
         limit: 1,
         filter: [
-          `word = ${q}`
+          `word = "${q}"`
         ]
       }
     })

@@ -38,7 +38,7 @@ cd ./better-melon-mapper
 ```.env
 PORT=6969
 ANILIST_URL=https://graphql.anilist.co/
-ANIWATCH_URL=http://localhost:4000/api/v2/hianime
+HIANIME_URL=http://localhost:4000/api/v2/hianime
 JIMAKU_KEY=
 JIMAKU_URL=https://jimaku.cc
 REDIS_URL=redis://localhost:6379

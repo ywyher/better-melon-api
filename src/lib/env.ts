@@ -9,7 +9,7 @@ export const env = createEnv({
     MEILISEARCH_API_KEY: z.string(),
 
     ANILIST_URL: z.string().url(),
-    ANIWATCH_URL: z.string().url(),
+    HIANIME_URL: z.string().url(),
 
     JIMAKU_KEY: z.string().min(1),
     JIMAKU_URL: z.string().url()
