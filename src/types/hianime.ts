@@ -26,16 +26,14 @@ export const hianimeAnimeEpisode = t.Object({
   isFiller: t.Boolean(),
 })
 
-export const hianimeAnimeEpisodeStreamingLink = t.Object({
+export const hianimeAnimeEpisodeSources = t.Object({
   headers: t.Object({
     Referer: t.String()
   }),
   tracks: t.Array(
     t.Object({
-      file: t.String(),
-      label: t.Optional(t.String()),
-      kind: t.UnionEnum(['captions', 'thumbnails', 'chapters']),
-      default: t.Optional(t.Boolean())
+      url: t.String(),
+      lang: t.Optional(t.String()),
     })
   ),
   intro: t.Object({
@@ -50,8 +48,8 @@ export const hianimeAnimeEpisodeStreamingLink = t.Object({
     url: t.String(),
     type: t.String()
   })),
-  anilistId: t.Optional(t.Number()),
-  malId: t.Optional(t.Number())
+  anilistID: t.Nullable(t.Number()),
+  malID: t.Nullable(t.Number())
 })
 
 export const hianimeAnimeData = t.Object({
@@ -61,7 +59,7 @@ export const hianimeAnimeData = t.Object({
   poster: t.String(),
   duration: t.String(),
   type: hianimeAnimeType,
-  rating: t.String(),
+  rating: t.Nullable(t.Number()),
   episodes: t.Object({
     sub: t.Number(),
     dub: t.Number(),
@@ -92,11 +90,11 @@ export const hianimeEpisodesResponse = t.Object({
 
 export const hianimeAnimeResponse = t.Object({
   details: anilistAnimeData,
-  streamingLinks: hianimeAnimeEpisodeStreamingLink
+  sources: hianimeAnimeEpisodeSources
 })
 
 export type HianimeAnimeResponse = typeof hianimeAnimeResponse.static
-export type HianimeAnimeEpisodeStreamingLink = typeof hianimeAnimeEpisodeStreamingLink.static
+export type HianimeAnimeEpisodeSources = typeof hianimeAnimeEpisodeSources.static
 export type HianimeAnimeData = typeof hianimeAnimeData.static
 export type HianimeAnimeEpisode = typeof hianimeAnimeEpisode.static
 export type HianimeSearchResponse = typeof hianimeSearchResponse.static

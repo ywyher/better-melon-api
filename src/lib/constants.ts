@@ -14,8 +14,8 @@ export const cacheKeys = {
     info: "hianime:info",
     // hianime:episodes:${hianimeAnimeId}
     episodes: "hianime:episodes",
-    // hianime:links:${hianimeAnimeEpisodeId}
-    links: "hianime:links"
+    // hianime:sources:${hianimeAnimeEpisodeId}
+    sources: "hianime:sources"
   },
   jimaku: {
     // jimaku:entries:${anilistId}

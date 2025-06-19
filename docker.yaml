@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   aniwatch-api:
-    image: ghcr.io/ghoshritesh12/aniwatch
+    image: ghcr.io/ghoshritesh12/aniwatch:v2.17.0
     container_name: aniwatch-api
     ports:
       - "4000:4000"

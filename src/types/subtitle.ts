@@ -20,7 +20,7 @@ export const subtitleFile = t.Object({
   url: t.String(),
   name: t.String(),
   size: t.Number(),
-  last_modified: t.Date()
+  last_modified: t.String()
 })
 
 

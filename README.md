@@ -28,17 +28,11 @@ cd ./better-melon-mapper
 ### 2. Run required services
 - Create an account on [Jimaku.cc](https://jimaku.cc) and generate an API token
 - Set up AniList API credentials at [anilist.co/settings/developer](https://anilist.co/settings/developer)
-- Set up Aniwatch API and Redis by running:
-  ```sh
-  docker compose -f docker.yaml up -d
-  ```
-  This will start both the Aniwatch API and Redis cache services automatically.
 
 ### 3. Setup enviroment variables
 ```.env
 PORT=6969
 ANILIST_URL=https://graphql.anilist.co/
-HIANIME_URL=http://localhost:4000/api/v2/hianime
 JIMAKU_KEY=
 JIMAKU_URL=https://jimaku.cc
 REDIS_URL=redis://localhost:6379
@@ -53,5 +47,5 @@ bun i && bun dev
 - [Better Melon](https://github.com/ywyher/better-melon) -> what is the purpose of better-melon-mapper without better-melon am i right ??
 - [Anilist](https://anilist.co/) -> Used to fetch anime general data
 - [Jimaku](https://jimaku.cc/) -> Used to fetch japanese subtitles
-- [Aniwatch API](https://github.com/ghoshRitesh12/aniwatch-api) -> Used to fetch anime streaming data
+- [Aniwatch](https://github.com/ghoshRitesh12/aniwatch) -> Used to fetch anime streaming data
 - [ywyh (Me)](https://github.com/ywyher) – for being goated ig

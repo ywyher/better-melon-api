@@ -3,7 +3,7 @@ import { getSubtitleFiles } from "./services/subtitle";
 import { getHianimeAnime } from "./services/hianime";
 import { createError } from "./utils/utils";
 import { subtitleFile } from "./types/subtitle";
-import { hianimeAnimeEpisodeStreamingLink } from "./types/hianime";
+import { hianimeAnimeEpisodeSources } from "./types/hianime";
 import { animeProvider } from "./types";
 import { anilistAnimeData } from "./types/anilist";
 import { searchJMdict } from "./services/jmdict";
@@ -11,6 +11,7 @@ import { jmdictSearchResponse } from "./types/jmdict";
 import { searchDictionary } from "./services/dictionary";
 import { dictionarySearchResponse } from "./types/dictionary";
 import { searchNHK } from "./services/nhk";
+import { redis } from "bun";
 
 export const api = new Elysia({ prefix: '/api' })
   .get('/dictionary/search/:query', 
@@ -77,7 +78,7 @@ export const api = new Elysia({ prefix: '/api' })
           data: {
             provider,
             details: anime.details,
-            streamingLinks: anime.streamingLinks,
+            sources: anime.sources,
             subtitles: subtitleFiles,
           }
         };
@@ -96,11 +97,17 @@ export const api = new Elysia({ prefix: '/api' })
         data: t.Optional(t.Object({
           provider: animeProvider,
           details: anilistAnimeData,
-          streamingLinks: hianimeAnimeEpisodeStreamingLink,
+          sources: hianimeAnimeEpisodeSources,
           subtitles: t.Array(subtitleFile)
         })),
         message: t.Optional(t.String())
       })
+  })
+  .get('/cache/delete', async () => {
+    const keys = await redis.keys('*')
+    keys.forEach(async (key) => {
+      await redis.del(key);
+    })
   })
   .get('/pitch/search/:query',
     async ({ params: { query } }) => {
