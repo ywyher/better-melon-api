@@ -61,7 +61,33 @@ export const api = new Elysia({ prefix: '/api' })
       message: t.Optional(t.String())
     })
   })
-  .get('/:anilistId/:episodeNumber/:provider',
+  .get('/pitch/search/*',
+    async ({ params }) => {
+      try {
+        const decodedQuery = decodeURIComponent(params['*'])
+        const { entries } = await searchNHK(decodedQuery)
+
+        return {
+          success: true,
+          data: {
+            entries
+          },
+        }
+      } catch (error) {
+        return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
+      }
+    }, {
+      params: t.Object({
+        "*": t.String()
+      }),
+      response: t.Object({
+        success: t.Boolean(),
+        data: t.Optional(t.Any()),
+        message: t.Optional(t.String())
+      })
+    }
+  )
+  .get('/anime/:anilistId/:episodeNumber/:provider',
     async ({ params: { anilistId, episodeNumber, provider } }) => {
       const fetchStart = performance.now()
       console.clear()
@@ -109,30 +135,4 @@ export const api = new Elysia({ prefix: '/api' })
       await redis.del(key);
     })
   })
-  .get('/pitch/search/:query',
-    async ({ params: { query } }) => {
-      try {
-        const decodedQuery = decodeURIComponent(query)
-        const { entries } = await searchNHK(decodedQuery)
-
-        return {
-          success: true,
-          data: {
-            entries
-          },
-        }
-      } catch (error) {
-        return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
-      }
-    }, {
-      params: t.Object({
-        query: t.String()
-      }),
-      response: t.Object({
-        success: t.Boolean(),
-        data: t.Optional(t.Any()),
-        message: t.Optional(t.String())
-      })
-    }
-  )
   .get('/health', () => ({ status: 'ok' }))

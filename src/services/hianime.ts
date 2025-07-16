@@ -85,8 +85,6 @@ export async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promis
       language: 'sub'
     })
 
-    console.log(animes)
-
     if (!animes?.length) {
       throw new Error(`No anime found on HiAnime for: ${q}`);
     }
@@ -161,7 +159,6 @@ export async function getHianimeAnime(anilistId: string, episodeNumber: string):
     
     console.log('Fetching hianime anime info...');
     const animeData = await getHianimeAnimeInfo(anilistAnimeData);
-    console.log(animeData)
     if(!animeData) {
       console.error('No anime data found from HiAnime');
       throw new Error("Couldn't find anime data from HiAnime");
@@ -175,6 +172,8 @@ export async function getHianimeAnime(anilistId: string, episodeNumber: string):
     console.log('Fetching streaming links...');
     const sources = await getHianimeAnimeEpisodeSources(episodes, episodeNumber);
     console.log('Successfully fetched streaming links');
+
+    console.log(sources)
 
     return {
       details: anilistAnimeData,
