@@ -8,7 +8,7 @@ import { hianimeAnimeEpisodeSources } from "../types/hianime";
 import { subtitleFile } from "../types/jiamku";
 import { getKitsuAnimeEpisodes, getKitsuAnimeInfo } from "../services/kitsu";
 import { getAnilistAnime } from "../services/anilist";
-import { kitsuAnimeEpisode } from "../types/kitsu";
+import { kitsuAnimeEpisode, kitsuAnimeEpisodesReponse } from "../types/kitsu";
 
 export const anime = new Elysia({ prefix: 'anime' })
   .get('/:anilistId/:episodeNumber/:provider',
@@ -55,15 +55,17 @@ export const anime = new Elysia({ prefix: 'anime' })
       })
   })
   .get('/:anilistId/episodes',
-    async ({ params: { anilistId } }) => {
+    async ({ params: { anilistId }, query: { limit, offset } }) => {
       const fetchStart = performance.now()
 
       try {
         const anilistData = await getAnilistAnime(anilistId)
         const anime = await getKitsuAnimeInfo(anilistData);
-        const episodes = await getKitsuAnimeEpisodes({
+        const { count, episodes } = await getKitsuAnimeEpisodes({
           kitsuAnimeId: anime.id,
-          anilistData
+          anilistData,
+          limit,
+          offset
         })
    
         const fetchEnd = performance.now()
@@ -71,7 +73,10 @@ export const anime = new Elysia({ prefix: 'anime' })
   
         return {
           success: true,
-          data: episodes
+          data: {
+            episodes,
+            count
+          }
         };
       } catch (error) {
         return createError(`${error instanceof Error ? error.message : 'Failed to fetch data from hianime provider: Unknown error'}`);
@@ -83,7 +88,11 @@ export const anime = new Elysia({ prefix: 'anime' })
       }),
       response: t.Object({
         success: t.Boolean(),
-        data: t.Optional(t.Array(kitsuAnimeEpisode)),
+        data: t.Optional(kitsuAnimeEpisodesReponse),
         message: t.Optional(t.String())
+      }),
+      query: t.Object({
+        limit: t.Optional(t.Number()),
+        offset: t.Optional(t.Number())
       })
   })

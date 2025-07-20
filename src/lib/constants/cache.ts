@@ -16,6 +16,10 @@ export const cacheKeys = {
   },
   kitsu: {
     info: (animeId: AnilistAnimeData['id']) => `kitsu:info:${animeId}`,
-    episodes: (animeId: AnilistAnimeData['id']) => `kitsu:episodes:${animeId}`
+    episodes: ({
+      animeId, offset, limit
+    }: {
+      animeId: AnilistAnimeData['id'], limit: number | string, offset: number
+    }) => `kitsu:episodes:${animeId}:${limit}:${offset}`
   }
 }

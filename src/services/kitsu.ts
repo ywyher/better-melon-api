@@ -1,6 +1,6 @@
 import { redis } from "bun";
 import { AnilistAnimeData, AnilistAnimeStatus } from "../types/anilist";
-import { KitsuApiResponse, KitsuAnimeInfo, KitsuAnimeEpisode, KitsuAnimeStatus, AnilistToKitsu, kitsuAnimeStatus } from "../types/kitsu";
+import { KitsuApiResponse, KitsuAnimeInfo, KitsuAnimeEpisode, KitsuAnimeStatus, AnilistToKitsu, kitsuAnimeStatus, KitsuAnimeEpisodesReponse } from "../types/kitsu";
 import { env } from "../lib/env";
 import { makeRequest } from "../utils/utils";
 import { cacheKeys } from "../lib/constants/cache";
@@ -92,30 +92,42 @@ export async function getKitsuAnimeInfo(anilistData: AnilistAnimeData): Promise<
   }
 }
 
+
 export async function getKitsuAnimeEpisodes({
   kitsuAnimeId,
-  anilistData
+  anilistData,
+  limit,
+  offset
 }: {
   kitsuAnimeId: KitsuAnimeInfo['id']
   anilistData: AnilistAnimeData
-}): Promise<KitsuAnimeEpisode[]> {
+  limit?: number
+  offset?: number
+}): Promise<KitsuAnimeEpisodesReponse> {
   try {
-    const cacheKey = cacheKeys.kitsu.episodes(kitsuAnimeId);
+    const kitsuLimit = 20; // Maximum allowed by Kitsu API
+    const startOffset = offset ?? 0;
+    
+    const cacheKey = `${cacheKeys.kitsu.episodes({
+      animeId: kitsuAnimeId,
+      limit: limit || "all",
+      offset: startOffset
+    })}`;
     const cachedData = await redis.get(cacheKey);
     
     if (cachedData) {
-      console.log(`Cache hit for kitsu episodes, anime ID: ${kitsuAnimeId}`);
-      return JSON.parse(cachedData as string) as KitsuAnimeEpisode[];
+      console.log(`Cache hit for kitsu episodes, anime ID: ${kitsuAnimeId}, limit: ${limit || 'all'}, offset: ${startOffset}`);
+      return JSON.parse(cachedData as string) as KitsuAnimeEpisodesReponse;
     }
 
     const allEpisodes: KitsuAnimeEpisode[] = [];
-    let offset = 0;
-    const limit = 20; // Maximum allowed by Kitsu
+    let currentOffset = startOffset;
     let hasMorePages = true;
+    let totalKitsuCount: number | undefined; // Store the total count from Kitsu (all episodes)
 
     while (hasMorePages) {
       const { data: { data, meta } } = await makeRequest<KitsuApiResponse<KitsuAnimeEpisode[]>>(`
-        ${env.KITSU_API_URL}/anime/${kitsuAnimeId}/episodes?page[limit]=${limit}&page[offset]=${offset}
+        ${env.KITSU_API_URL}/anime/${kitsuAnimeId}/episodes?page[limit]=${kitsuLimit}&page[offset]=${currentOffset}
       `, {
         name: 'kitsu-anime-episodes',
         benchmark: true,
@@ -126,10 +138,15 @@ export async function getKitsuAnimeEpisodes({
       });
 
       if (!data?.length) {
-        if (offset === 0) {
-          throw new Error(`No episodes found on Kitsu for anime ID: ${kitsuAnimeId}`);
+        if (currentOffset === startOffset) {
+          throw new Error(`No episodes found on Kitsu for anime ID: ${kitsuAnimeId} at offset ${startOffset}`);
         }
         break; // No more episodes to fetch
+      }
+
+      // Store the total count from the first response
+      if (totalKitsuCount === undefined && meta?.count) {
+        totalKitsuCount = meta.count;
       }
 
       // Filter out episodes after nextAiringEpisode if it exists
@@ -137,7 +154,6 @@ export async function getKitsuAnimeEpisodes({
         ? data.filter(episode => episode.attributes?.number && episode.attributes.number < anilistData.nextAiringEpisode!.episode)
         : data;
 
-      // Process episodes to replace null values with AniList defaults
       const processedEpisodes = filteredData.map(episode => {
         const processedEpisode = { ...episode };
         
@@ -170,6 +186,14 @@ export async function getKitsuAnimeEpisodes({
 
       allEpisodes.push(...processedEpisodes);
 
+      // Check if we've reached the user-specified limit
+      if (limit && allEpisodes.length >= limit) {
+        console.log(`Reached limit of ${limit}, stopping fetch`);
+        // Trim to exact count if we exceeded it
+        allEpisodes.splice(limit);
+        break;
+      }
+
       // If we filtered out episodes, we might need to stop early
       if (anilistData.nextAiringEpisode && filteredData.length < data.length) {
         console.log(`Stopped fetching at episode ${anilistData.nextAiringEpisode.episode - 1} due to nextAiringEpisode limit`);
@@ -177,34 +201,55 @@ export async function getKitsuAnimeEpisodes({
       }
 
       // Check if there are more pages
-      offset += limit;
+      currentOffset += kitsuLimit;
       
       // Multiple ways to determine if there are more pages:
       if (meta?.count) {
         // If total count is available
-        hasMorePages = offset < meta.count;
-      } else if (data.length < limit) {
+        hasMorePages = currentOffset < meta.count;
+      } else if (data.length < kitsuLimit) {
         // If we got fewer episodes than the limit, we've reached the end
         hasMorePages = false;
       } else {
         // Fallback: assume there might be more if we got exactly the limit
-        hasMorePages = data.length === limit;
+        hasMorePages = data.length === kitsuLimit;
       }
 
-      console.log(`Fetched ${data.length} episodes (${allEpisodes.length}/${meta.count || '?'} total)`);
+      console.log(`Fetched ${data.length} episodes (${allEpisodes.length}/${totalKitsuCount || '?'} total) with Kitsu API limit: ${kitsuLimit}, offset: ${currentOffset - kitsuLimit}`);
     }
 
-    console.log(`Successfully fetched all ${allEpisodes.length} episodes for anime ID: ${kitsuAnimeId}`);
+    console.log(`Successfully fetched ${allEpisodes.length} episodes for anime ID: ${kitsuAnimeId} (limit: ${limit || 'all'}, starting offset: ${startOffset})`);
+
+    // Calculate the current aired episode count
+    let currentAiredCount: number;
+    
+    if (anilistData.nextAiringEpisode && anilistData.nextAiringEpisode.episode) {
+      // If there's a next airing episode, current aired count is nextEpisode - 1
+      currentAiredCount = anilistData.nextAiringEpisode.episode - 1;
+    } else if (anilistData.status === 'FINISHED') {
+      // If the anime is finished, use the total episode count from AniList or Kitsu
+      currentAiredCount = anilistData.episodes || totalKitsuCount || allEpisodes.length;
+    } else {
+      // For ongoing series without nextAiringEpisode info, use the actual fetched count
+      // This might happen for series that are airing but don't have next episode data
+      currentAiredCount = allEpisodes.length;
+    }
+
+    const result: KitsuAnimeEpisodesReponse = {
+      episodes: allEpisodes,
+      count: currentAiredCount,
+    };
 
     // Set cache TTL based on nextAiringEpisode
     const cacheTtl = anilistData.nextAiringEpisode 
       ? Math.max(anilistData.nextAiringEpisode.timeUntilAiring, 60) // Minimum 60 seconds to avoid too frequent updates
       : 3600;
 
-    await redis.set(cacheKey, JSON.stringify(allEpisodes), "EX", cacheTtl);
-    console.log(`Cached kitsu episodes for anime ID: ${kitsuAnimeId} with TTL: ${cacheTtl}s`);
+    await redis.set(cacheKey, JSON.stringify(result), "EX", cacheTtl);
+    console.log(`Cached kitsu episodes for anime ID: ${kitsuAnimeId} with TTL: ${cacheTtl}s (limit: ${limit || 'all'}, offset: ${startOffset})`);
+    console.log(`Current aired episodes: ${currentAiredCount}, Total planned episodes: ${totalKitsuCount || 'unknown'}`);
 
-    return allEpisodes;
+    return result;
   } catch (error) {
     console.error(`Error fetching kitsu episodes for ${kitsuAnimeId}:`, error);
     throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch kitsu anime episodes: Unknown error'}`);

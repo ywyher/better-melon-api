@@ -145,6 +145,12 @@ export const kitsuAnimeEpisode = t.Object({
   relationships: t.Any()
 })
 
+export const kitsuAnimeEpisodesReponse = t.Object({
+  episodes: t.Array(kitsuAnimeEpisode),
+  count: t.Number()
+})
+
+export type KitsuAnimeEpisodesReponse = typeof kitsuAnimeEpisodesReponse.static
 export type KitsuAnimeAttributes = typeof kitsuAnimeAttributes.static
 export type KitsuAnimeInfo = typeof kitsuAnimeInfo.static
 export type KitsuAnimeStatus = typeof kitsuAnimeStatus.static

@@ -15,9 +15,14 @@ export const server = new Elysia({ serve: { idleTimeout: 255 } })
       indexes: indexes[0],
       routes: [
         '/api/anime/:anilistId/:episodeNumber/:provider',
+        '/api/anime/:anilistId/episodes',
+
         '/api/indexes/:index/search/:query',
         '/api/dictionary/search/:query',
-        '/api/health'
+        '/api/pitch/search/:query',
+
+        '/api/cache/delete',
+        '/api/health',
       ]
     }
   })
