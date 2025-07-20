@@ -63,7 +63,7 @@ export const anime = new Elysia({ prefix: 'anime' })
         const anime = await getKitsuAnimeInfo(anilistData);
         const episodes = await getKitsuAnimeEpisodes({
           kitsuAnimeId: anime.id,
-          nextAiringEpisode: anilistData.nextAiringEpisode
+          anilistData
         })
    
         const fetchEnd = performance.now()

@@ -35,6 +35,8 @@ async function getAnilistAnimeStaticData({ anilistId }: { anilistId: AnilistAnim
                 }
                 title {
                   english
+                  romaji
+                  native
                 }
                 format
                 description

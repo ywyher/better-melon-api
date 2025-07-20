@@ -7,7 +7,7 @@ test("returns anime episodes data from kitsu", async () => {
     const info = await getKitsuAnimeInfo(anilistData)
     const episodes = await getKitsuAnimeEpisodes({
         kitsuAnimeId: info.id,
-        nextAiringEpisode: anilistData.nextAiringEpisode
+        anilistData
     })
 
     expect(anilistData).not.toBeEmpty()

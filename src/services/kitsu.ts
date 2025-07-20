@@ -1,5 +1,5 @@
 import { redis } from "bun";
-import { AnilistAnimeData, AnilistAnimeStatus, AnilistNextAiringEpisode } from "../types/anilist";
+import { AnilistAnimeData, AnilistAnimeStatus } from "../types/anilist";
 import { KitsuApiResponse, KitsuAnimeInfo, KitsuAnimeEpisode, KitsuAnimeStatus, AnilistToKitsu, kitsuAnimeStatus } from "../types/kitsu";
 import { env } from "../lib/env";
 import { makeRequest } from "../utils/utils";
@@ -94,10 +94,10 @@ export async function getKitsuAnimeInfo(anilistData: AnilistAnimeData): Promise<
 
 export async function getKitsuAnimeEpisodes({
   kitsuAnimeId,
-  nextAiringEpisode
+  anilistData
 }: {
   kitsuAnimeId: KitsuAnimeInfo['id']
-  nextAiringEpisode: AnilistNextAiringEpisode | null
+  anilistData: AnilistAnimeData
 }): Promise<KitsuAnimeEpisode[]> {
   try {
     const cacheKey = cacheKeys.kitsu.episodes(kitsuAnimeId);
@@ -116,8 +116,7 @@ export async function getKitsuAnimeEpisodes({
     while (hasMorePages) {
       const { data: { data, meta } } = await makeRequest<KitsuApiResponse<KitsuAnimeEpisode[]>>(`
         ${env.KITSU_API_URL}/anime/${kitsuAnimeId}/episodes?page[limit]=${limit}&page[offset]=${offset}
-      `, 
-      {
+      `, {
         name: 'kitsu-anime-episodes',
         benchmark: true,
         headers: {
@@ -134,15 +133,46 @@ export async function getKitsuAnimeEpisodes({
       }
 
       // Filter out episodes after nextAiringEpisode if it exists
-      const filteredData = nextAiringEpisode 
-        ? data.filter(episode => episode.attributes?.number && episode.attributes.number < nextAiringEpisode.episode)
+      const filteredData = (anilistData.nextAiringEpisode && anilistData.nextAiringEpisode.episode)
+        ? data.filter(episode => episode.attributes?.number && episode.attributes.number < anilistData.nextAiringEpisode!.episode)
         : data;
 
-      allEpisodes.push(...filteredData);
+      // Process episodes to replace null values with AniList defaults
+      const processedEpisodes = filteredData.map(episode => {
+        const processedEpisode = { ...episode };
+        
+        if (processedEpisode.attributes) {
+          if (!processedEpisode.attributes.titles || Object.keys(processedEpisode.attributes.titles).length === 0) {
+            processedEpisode.attributes.titles = {
+              en: anilistData.title.english || '',
+              en_jp: anilistData.title.romaji || anilistData.title.english || '',
+              en_us: anilistData.title.english || '',
+              ja_jp: anilistData.title.native || anilistData.title.romaji || ''
+            };
+          }
+
+          if (!processedEpisode.attributes.canonicalTitle) {
+            processedEpisode.attributes.canonicalTitle = anilistData.title.english || anilistData.title.romaji || '';
+          }
+
+          if (!processedEpisode.attributes.thumbnail) {
+            const fallbackImage = anilistData.bannerImage || anilistData.coverImage.large;
+            if (fallbackImage) {
+              processedEpisode.attributes.thumbnail = {
+                original: fallbackImage,
+              };
+            }
+          }
+        }
+        
+        return processedEpisode;
+      });
+
+      allEpisodes.push(...processedEpisodes);
 
       // If we filtered out episodes, we might need to stop early
-      if (nextAiringEpisode && filteredData.length < data.length) {
-        console.log(`Stopped fetching at episode ${nextAiringEpisode.episode - 1} due to nextAiringEpisode limit`);
+      if (anilistData.nextAiringEpisode && filteredData.length < data.length) {
+        console.log(`Stopped fetching at episode ${anilistData.nextAiringEpisode.episode - 1} due to nextAiringEpisode limit`);
         break;
       }
 
@@ -167,8 +197,8 @@ export async function getKitsuAnimeEpisodes({
     console.log(`Successfully fetched all ${allEpisodes.length} episodes for anime ID: ${kitsuAnimeId}`);
 
     // Set cache TTL based on nextAiringEpisode
-    const cacheTtl = nextAiringEpisode 
-      ? Math.max(nextAiringEpisode.timeUntilAiring, 60) // Minimum 60 seconds to avoid too frequent updates
+    const cacheTtl = anilistData.nextAiringEpisode 
+      ? Math.max(anilistData.nextAiringEpisode.timeUntilAiring, 60) // Minimum 60 seconds to avoid too frequent updates
       : 3600;
 
     await redis.set(cacheKey, JSON.stringify(allEpisodes), "EX", cacheTtl);
