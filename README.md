@@ -32,10 +32,12 @@ cd ./better-melon-mapper
 ### 3. Setup enviroment variables
 ```.env
 PORT=6969
-ANILIST_URL=https://graphql.anilist.co/
+
+ANILIST_API_URL=https://graphql.anilist.co/
+KITSU_API_URL=https://kitsu.io/api/edge/
+
 JIMAKU_KEY=
 JIMAKU_URL=https://jimaku.cc
-REDIS_URL=redis://localhost:6379
 ```
 
 ### 4. Install dependencies and start the API

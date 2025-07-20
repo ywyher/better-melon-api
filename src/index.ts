@@ -1,18 +1,11 @@
 import Elysia from "elysia";
-import { env } from "./lib/env";
-import { api } from "./api";
-import { animeProviders, indexes } from "./lib/constants";
 import { cors } from '@elysiajs/cors';
+import { env } from "./lib/env";
+import { animeProviders, indexes } from "./lib/constants/constants";
+import { api } from "./routes/api";
 
-export const server = new Elysia()
+export const server = new Elysia({ serve: { idleTimeout: 255 } })
   .use(cors())
-  // .onError(({ code }) => {
-  //   if(code == 'NOT_FOUND') {
-  //     return createError(code)
-  //   }else if (code == 'VALIDATION') {
-  //     return createError(code)
-  //   }
-  // })
   .use(api)
   .get('/', () => {
     return {

@@ -1,7 +1,7 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { AnimeProvider, ErrorResponse } from "../types";
 import client from "../lib/client";
-import { animeProviders } from "../lib/constants";
+import { animeProviders } from "../lib/constants/constants";
 
 export const isValidProvider = (provider: string): provider is AnimeProvider => {
   return animeProviders.includes(provider as AnimeProvider);

@@ -1,23 +1,23 @@
-import { AnilistAnimeData, AnilistAnimeResponse } from "../types/anilist"
+import { AnilistAnimeData, AnilistAnimeDyanmicData, AnilistAnimeResponse, AnilistAnimeStaticData } from "../types/anilist"
 import { makeRequest } from "../utils/utils";
 import { env } from "../lib/env";
 import { redis } from "bun";
-import { cacheKeys } from "../lib/constants";
+import { cacheKeys } from "../lib/constants/cache";
 
-export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promise<AnilistAnimeData> {
+async function getAnilistAnimeStaticData({ anilistId }: { anilistId: AnilistAnimeData['id'] }): Promise<AnilistAnimeStaticData> {
   try {
-    const cacheKey = `${cacheKeys.anilist.anime}:${anilistId}`;
+    const cacheKey = `${cacheKeys.anilist.staticData(anilistId)}`;
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
-      console.log(`Cache hit for anilist anime ID: ${anilistId}`);
+      console.log(`Cache hit for anilist static anime data ID: ${anilistId}`);
       return JSON.parse(cachedData as string) as AnilistAnimeData;
     }
     
-    const { data: { data: anilistAnimeData } } = await makeRequest<AnilistAnimeResponse>(
-      env.ANILIST_URL,
+    const { data: { data: anilistAnimeData } } = await makeRequest<AnilistAnimeResponse<AnilistAnimeStaticData>>(
+      env.ANILIST_API_URL,
       {
         benchmark: true,
-        name: 'anilist',
+        name: 'anilist-static-data',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -37,14 +37,8 @@ export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promis
                   english
                 }
                 format
-                episodes
-                nextAiringEpisode {
-                  episode
-                  timeUntilAiring
-                }
                 description
                 genres
-                status
                 season
                 seasonYear
                 startDate {
@@ -73,5 +67,50 @@ export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promis
     return animeData;
   } catch (error) {
     throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch anilist data: Unknown error'}`)
+  }
+}
+
+async function getAnilistAnimeDynamicData({ anilistId }: { anilistId: AnilistAnimeData['id'] }): Promise<AnilistAnimeDyanmicData> {
+  try {
+    const { data: { data: anilistAnimeData } } = await makeRequest<AnilistAnimeResponse<AnilistAnimeDyanmicData>>(
+      env.ANILIST_API_URL,
+      {
+        benchmark: true,
+        name: 'anilist-dynamic-data',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `
+            query {
+              Media(id: ${anilistId}) {
+                status
+                episodes
+                nextAiringEpisode {
+                  episode
+                  timeUntilAiring
+                }
+              }
+            }
+          `,
+        }
+      }, 
+    );
+
+    const animeData = anilistAnimeData.Media;
+    return animeData;
+  } catch (error) {
+    throw new Error(`${error instanceof Error ? error.message : 'Failed to fetch anilist data: Unknown error'}`)
+  }
+}
+
+export async function getAnilistAnime(anilistId: AnilistAnimeData['id']): Promise<AnilistAnimeData> {
+  const staticData = await getAnilistAnimeStaticData({ anilistId })
+  const dynamicData = await getAnilistAnimeDynamicData({ anilistId })
+
+  return {
+    ...staticData,
+    ...dynamicData
   }
 }

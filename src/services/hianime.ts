@@ -2,8 +2,8 @@ import { redis } from "bun";
 import { AnilistAnimeData, AnilistAnimeFormat, AnilistAnimeStatus } from "../types/anilist";
 import { AnilistToHiAnime, HianimeAnimeData, HianimeAnimeEpisode, HianimeAnimeEpisodeSources, HianimeAnimeEpisodesResponse, hianimeAnimeResponse, HianimeAnimeResponse, hianimeAnimeStatus, HianimeAnimeStatus, hianimeAnimeType, HianimeAnimeType, HianimeApiResponse, HianimeSearchResponse } from "../types/hianime";
 import { getAnilistAnime } from "./anilist";
-import { cacheKeys } from "../lib/constants";
 import { HiAnime } from "aniwatch";
+import { cacheKeys } from "../lib/constants/cache";
 
 const hianime = new HiAnime.Scraper
 
@@ -13,7 +13,6 @@ async function mapAnilistToHianime(anilistData: AnilistAnimeData): Promise<Anili
   try {
     const format = anilistData.format;
     const status = anilistData.status;
-    const season = anilistData.season.toLowerCase() as AnilistToHiAnime['season'];
     const startDate = anilistData.startDate;
     const endDate = anilistData.endDate;
     const title = anilistData.title.english.toLowerCase().replace(/\s+/g, '+');
@@ -49,9 +48,8 @@ async function mapAnilistToHianime(anilistData: AnilistAnimeData): Promise<Anili
       success: true,
       type: mappedType,
       status: mappedStatus,
-      season,
       startDate: `${startDate.year}-${startDate.month}-${startDate.day}`,
-      endDate: `${endDate.year}-${endDate.month}-${endDate.day}`
+      endDate: mappedStatus == 'finished-airing' ? `${endDate.year}-${endDate.month}-${endDate.day}` : null
     }
 
     const endTime = performance.now();
@@ -67,7 +65,7 @@ async function mapAnilistToHianime(anilistData: AnilistAnimeData): Promise<Anili
 
 export async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promise<HianimeAnimeData> {
   try {
-    const cacheKey = `${cacheKeys.hianime.info}:${anilistData.id}`;
+    const cacheKey = `${cacheKeys.hianime.info(anilistData.id)}`;
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
       console.log(`Cache hit for hianime anime ID: ${anilistData.id}`);
@@ -81,7 +79,7 @@ export async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promis
       type,
       status,
       start_date: startDate,
-      end_date: endDate,
+      end_date: endDate ? endDate : undefined,
       language: 'sub'
     })
 
@@ -105,7 +103,7 @@ export async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promis
 
 export async function getHianimeAnimeEpisodes(animeId: HianimeAnimeData['id']): Promise<HianimeAnimeEpisodesResponse> {
   try {
-    const cacheKey = `${cacheKeys.hianime.episodes}:${animeId}`;
+    const cacheKey = `${cacheKeys.hianime.episodes(animeId)}`;
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
       console.log(`Cache hit for hianime anime ID: ${animeId}`);
@@ -130,7 +128,7 @@ export async function getHianimeAnimeEpisodeSources(episodes: HianimeAnimeEpisod
     const episode = episodes.find(e => e.number === Number(episodeNumber));
     if(!episode) throw new Error("Couldn't find hianime anime episode data")
 
-    const cacheKey = `${cacheKeys.hianime.sources}:${episode.episodeId}`;
+    const cacheKey = `${cacheKeys.hianime.sources(episode.episodeId)}`;
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
       console.log(`Cache hit for hianime anime ID: ${episode.episodeId}`);

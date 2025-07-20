@@ -1,5 +1,7 @@
 import { t } from "elysia";
 
+export const datePattern = '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; // YYYY-MM-DD
+
 export const animeProvider = t.UnionEnum(['hianime'],{
   error: {
     success: false,
