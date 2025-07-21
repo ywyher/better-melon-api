@@ -125,7 +125,7 @@ export const kitsuAnimeEpisodeAttributes = t.Object({
   description: t.Nullable(t.String()),
   titles: t.Partial(kitsuAnimeTitles),
   canonicalTitle: t.Nullable(t.String()),
-  seasonNumber: t.Number(),
+  seasonNumber: t.Nullable(t.Number()),
   number: t.Number(),
   relativeNumber: t.Nullable(t.Number()),
   airdate: t.Nullable(t.String()),
