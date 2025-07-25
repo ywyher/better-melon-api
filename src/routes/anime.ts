@@ -8,7 +8,7 @@ import { hianimeAnimeEpisodeSources } from "../types/hianime";
 import { subtitleFile } from "../types/jiamku";
 import { getKitsuAnimeEpisodes, getKitsuAnimeInfo } from "../services/kitsu";
 import { getAnilistAnime } from "../services/anilist";
-import { kitsuAnimeEpisode, kitsuAnimeEpisodesReponse } from "../types/kitsu";
+import { kitsuAnimeEpisodesReponse } from "../types/kitsu";
 
 export const anime = new Elysia({ prefix: 'anime' })
   .get('/:anilistId/:episodeNumber/:provider',

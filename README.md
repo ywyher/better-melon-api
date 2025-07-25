@@ -13,16 +13,18 @@ An API made to fetch required data to run [Better Melon](https://github.com/ywyh
   - jmdict
   - kanjidic2
   - jmnedict
+  - nhk (pitch)
 
-# Better Melon Mapper Self-Hosting Guide
+# Better Melon Api Self-Hosting Guide
 > [!note]
 > this API utilizes [bun](https://bun.sh) make sure you have that installed
 
 ## Quick Start
 
+### 1. Clone the project
 ```sh
-git clone https://github.com/ywyher/better-melon-mapper ./better-melon-mapper
-cd ./better-melon-mapper
+git clone https://github.com/ywyher/better-melon-api ./better-melon-api
+cd ./better-melon-api
 ```
 
 ### 2. Run required services
@@ -46,7 +48,7 @@ bun i && bun dev
 ```
 
 # Credit
-- [Better Melon](https://github.com/ywyher/better-melon) -> what is the purpose of better-melon-mapper without better-melon am i right ??
+- [Better Melon](https://github.com/ywyher/better-melon) -> what is the purpose of better-melon-api without better-melon am i right ??
 - [Anilist](https://anilist.co/) -> Used to fetch anime general data
 - [Jimaku](https://jimaku.cc/) -> Used to fetch japanese subtitles
 - [Aniwatch](https://github.com/ghoshRitesh12/aniwatch) -> Used to fetch anime streaming data

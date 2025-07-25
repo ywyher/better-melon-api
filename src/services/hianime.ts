@@ -75,6 +75,8 @@ export async function getHianimeAnimeInfo(anilistData: AnilistAnimeData): Promis
     const mapped = await mapAnilistToHianime(anilistData);
     const { endDate, q, startDate, status, type } = mapped;
 
+    console.log(type)
+
     const { animes } = await hianime.search(q, 1, {
       type,
       status,

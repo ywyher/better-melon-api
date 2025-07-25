@@ -25,30 +25,34 @@ export const hianimeAnimeEpisode = t.Object({
   isFiller: t.Boolean(),
 })
 
+export const hianimeAnimeEpiosdeSourcesHeader = t.Object({
+  Referer: t.String()
+})
+
+export const hianimeAnimeEpisodeTimeSegment = t.Object({
+  intro: t.Number(),
+  outro: t.Number()
+})
+
+export const hianimeAnimeEpisodeTrack = t.Object({
+  url: t.String(),
+  label: t.Optional(t.String()),
+  kind: t.Optional(t.String()),
+})
+
+export const hianimeAnimeEpisodeSource = t.Object({
+  file: t.String(),
+  type: t.String()
+})
+
 export const hianimeAnimeEpisodeSources = t.Object({
-  headers: t.Object({
-    Referer: t.String()
-  }),
-  tracks: t.Array(
-    t.Object({
-      url: t.String(),
-      lang: t.Optional(t.String()),
-    })
-  ),
-  intro: t.Object({
-    start: t.Number(),
-    end: t.Number()
-  }),
-  outro: t.Object({
-    start: t.Number(),
-    end: t.Number()
-  }),
-  sources: t.Array(t.Object({
-    url: t.String(),
-    type: t.String()
-  })),
-  anilistID: t.Nullable(t.Number()),
-  malID: t.Nullable(t.Number())
+  headers: t.Optional(hianimeAnimeEpiosdeSourcesHeader),
+  tracks: t.Array(hianimeAnimeEpisodeTrack),
+  intro: hianimeAnimeEpisodeTimeSegment,
+  outro: hianimeAnimeEpisodeTimeSegment,
+  sources: t.Array(hianimeAnimeEpisodeSource),
+  iframe: t.String(),
+  serverId: t.String(),
 })
 
 export const hianimeAnimeData = t.Object({
